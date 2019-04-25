@@ -1,0 +1,4 @@
+
+<http://testVenus> <http://xmlns.com/foaf/0.1/name> "Venus" ;
+	<http://xmlns.com/foaf/0.1/test> "Venus" ;
+	<http://xmlns.com/foaf/0.1/pre2> "Venus" .

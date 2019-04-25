@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="skos:" iri="http://www.w3.org/2004/02/skos/core#"/>
+	<triplesMaps name="ConceptLocalizations">
+		<logicalSource  iterator="/Thesauri/Thesaurus/Terms/Term/Localizations" referenceFormulation="ql:XPath">
+			<source path="src/test/resources/exampleLanguageMap/VRT_Thesaurus_Avid_sample.XML"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/concept/{Localization[@Culture=\%22en\%22]/Label}"/>
+			<class>skos:Concept</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="ConceptLocalizations">
+			<predicateMaps>
+				<constant value="skos:prefLabel"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="ConceptLocalizations">
+				<reference value="Localization"/>
+				<languageTag ownTriplesMap="ConceptLocalizations">
+					<reference value="Localization[@Culture]"/>
+				</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="ConceptLocalizations">
+			<predicateMaps>
+				<constant value="skos:altLabel"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="ConceptLocalizations">
+				<reference value="Localization[@Culture=\%22nl-BE\%22]/Label"/>
+				<languageTag>nl</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

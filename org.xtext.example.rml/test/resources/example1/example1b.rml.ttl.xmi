@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="FromToMaps">
+		<logicalSource  iterator="/notes/note" referenceFormulation="ql:XPath">
+			<source path="{filename}"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.example.com/note/{@id}"/>
+			<class>mail:note</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="FromToMaps">
+			<predicateMaps>
+				<constant value="mail:when"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FromToMaps">
+				<template value="{@year}-{@month}-{@day}"/>
+				<datatype value="xsd:date"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="FromToMaps">
+			<predicateMaps>
+				<constant value="mail:from"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FromToMaps">
+				<reference value="from"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="FromToMaps">
+			<predicateMaps>
+				<constant value="mail:to"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FromToMaps">
+				<reference value="to"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="FromToMaps">
+			<predicateMaps>
+				<constant value="mail:heading"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FromToMaps">
+				<reference value="heading"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="FromToMaps">
+			<predicateMaps>
+				<constant value="mail:body"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FromToMaps">
+				<reference value="body"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="DateTime">
+		<logicalSource  iterator="/notes/note" referenceFormulation="ql:XPath">
+			<source path="{filename}"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.example.com/DateTime/{@year}{@month}{@day}"/>
+			<class>ex:DateTime</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="DateTime">
+			<predicateMaps>
+				<constant value="ex:day"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="DateTime">
+				<template value="---{@day}"/>
+				<datatype value="xsd:gDay"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="DateTime">
+			<predicateMaps>
+				<constant value="ex:day"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="DateTime">
+				<template value="---{@day}"/>
+				<datatype value="xsd:gDay"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="DateTime">
+			<predicateMaps>
+				<constant value="ex:day"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="DateTime">
+				<template value="---{@day}"/>
+				<datatype value="xsd:gDay"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

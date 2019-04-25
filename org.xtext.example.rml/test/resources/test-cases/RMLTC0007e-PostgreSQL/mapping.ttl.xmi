@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives base="http://example.com/base/"/>
+	<directives prefix="d2rq:" iri="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+	<triplesMaps name="TriplesMap1">
+		<logicalSource  sqlVersion="rr:SQL2008" tableName="student">
+			<source>
+				<database username="postgres" password="" jdbcDriver="org.postgresql.Driver" jdbcDSN="CONNECTIONDSN">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/Student/{ID}/{FirstName}"/>
+			<class>foaf:Person</class>
+			<graphMaps>
+				<constant value="ex:PersonGraph"/>
+			</graphMaps>
+		</subjectMap>
+	</triplesMaps>
+</rml:Mapping>

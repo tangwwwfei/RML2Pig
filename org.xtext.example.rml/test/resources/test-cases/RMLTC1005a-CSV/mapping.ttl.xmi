@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="rdf:" iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="map:" iri="http://mapping.example.com/"/>
+	<triplesMaps name="map:map_data1_0">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="data.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/{id}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="map:map_data1_0">
+			<predicateMaps ownTriplesMap="map:map_data1_0">
+				<constant value="rdf:type"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="map:map_data1_0">
+				<constant value="http://xmlns.com/foaf/0.1/Person"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="map:map_data1_0">
+			<predicateMaps ownTriplesMap="map:map_data1_0">
+				<constant value="rdf:type"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="map:map_data1_0">
+				<constant value="http://xmlns.com/foaf/0.1/Person"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="map:map_data2_0">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="data2.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/{id}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="map:map_data2_0">
+			<predicateMaps ownTriplesMap="map:map_data2_0">
+				<constant value="rdf:type"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="map:map_data2_0">
+				<constant value="http://xmlns.com/foaf/0.1/Person"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

@@ -1,0 +1,137 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix ex: <http://www.example.com/> .
+@prefix schema: <http://schema.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix dbo: <http://dbpedia.org/ontology/>.
+@prefix fnml: <http://semweb.mmlab.be/ns/fnml#> .
+@prefix fno: <http://w3id.org/function/ontology#> .
+@prefix afn: <http://users.ugent.be/~bjdmeest/function/anime.ttl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix bow: <https://betweenourworlds.org/ontology/>.
+
+@base <http://example.com/base> .
+<#SourceAnime> rml:source "anime-602.json".
+<#SourceAnime> rml:referenceFormulation ql:JSONPath.
+<#SourceAnime> rml:iterator "$.data[*]".
+
+<#Anime>
+    rml:logicalSource <#SourceAnime>;
+
+    rr:subjectMap [
+        rr:template "https://betweenourworlds.org/anime/{attributes.slug}";
+        rr:class dbo:Anime
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:name, rdfs:label, dbo:title;
+        rr:objectMap [ 
+	    rml:reference "attributes.canonicalTitle"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:name, rdfs:label, dbo:title;
+        rr:objectMap [ 
+	    rml:reference "attributes.titles.en";
+            rr:language "en"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:name, rdfs:label, dbo:title;
+        rr:objectMap [ 
+	    rml:reference "attributes.titles.en_jp";
+            rr:language "ja"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:name, rdfs:label, dbo:title;
+        rr:objectMap [ 
+	    rml:reference "attributes.titles.ja_jp";
+            rr:language "ja"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:numberOfEpisodes, dbo:numberOfEpisodes;
+        rr:objectMap [ 
+	    rml:reference "attributes.episodeCount"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:contentRating;
+        rr:objectMap [ 
+	    rml:reference "attributes.ageRating"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:contentRating;
+        rr:objectMap [ 
+	    rml:reference "attributes.ageRatingGuide"
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:endDate;
+        rr:objectMap [ 
+	    rml:reference "attributes.endDate";
+	    rr:datatype schema:Date
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:startDate;
+        rr:objectMap [ 
+	    rml:reference "attributes.startDate";
+	    rr:datatype schema:Date
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate rdfs:comment, schema:description;
+        rr:objectMap [ 
+	    rml:reference "attributes.synopsis"
+	];
+    ];
+
+    #refer to Kitsu.io page
+    rr:predicateObjectMap [
+        rr:predicate schema:mainEntityOfPage;
+        rr:objectMap [ 
+	    rr:template "https://kitsu.io/anime/{attributes.slug}";
+            rr:termType rr:Literal;
+            rr:datatype schema:URL
+	];
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:trailer;
+        rr:objectMap [ 
+	    rr:parentTriplesMap <#Trailer>
+	];
+    ].
+
+
+<#Trailer>
+    rml:logicalSource <#SourceAnime>;
+
+    rr:subjectMap [
+        rr:template "https://betweenourworlds.org/trailer/{attributes.slug}";
+        rr:class schema:VideoObject;
+    ];
+
+    rr:predicateObjectMap [
+        rr:predicate schema:url;
+        rr:objectMap [ 
+	    rr:template "https://www.youtube.com/watch?v={attributes.youtubeVideoId}";
+            rr:termType rr:Literal
+	];
+    ].
+

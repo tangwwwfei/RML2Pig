@@ -1,0 +1,115 @@
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix ex: <http://www.example.com/> .
+
+<#Author>
+  rml:logicalSource [
+    rml:source "authors.csv";
+    rml:referenceFormulation ql:CSV
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/author/{ID}";
+    rr:class ex:Person
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:name;
+    rr:objectMap [
+      rml:reference "name"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:position;
+    rr:objectMap [
+      rml:reference "position"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:worksForDepartment;
+    rr:objectMap [
+      rr:parentTriplesMap <#Department>;
+      rr:joinCondition [
+        rr:child "uni";
+        rr:parent "ID"
+      ]
+    ]
+  ].
+
+<#Paper>
+  rml:logicalSource [
+    rml:source "papers.csv";
+    rml:referenceFormulation ql:CSV
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/paper/{ID}";
+    rr:class ex:Paper
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:title;
+    rr:objectMap [
+      rml:reference "title"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:year;
+    rr:objectMap [
+      rml:reference "year"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:conference;
+    rr:objectMap [
+      rml:reference "conference"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:author;
+    rr:objectMap [
+      rr:parentTriplesMap <#Author>;
+      rr:joinCondition [
+        rr:child "author";
+        rr:parent "ID"
+      ]
+    ]
+  ].
+
+<#Department>
+  rml:logicalSource [
+    rml:source "universities.csv";
+    rml:referenceFormulation ql:CSV
+  ];
+
+  rr:subjectMap [
+    rr:template "http://example.com/department/{ID}";
+    rr:class ex:Department
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:name;
+    rr:objectMap [
+      rml:reference "department"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:country;
+    rr:objectMap [
+      rml:reference "country"
+    ]
+  ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:partOf;
+    rr:objectMap [
+      rml:reference "name"
+    ]
+  ].

@@ -1,0 +1,83 @@
+query 
+	Pig2Text = 
+		Pig!Program.allInstances()->
+			collect(c| c.toString().writeTo('C:/eclipse-workspace/RML2Pig/samples/output.pig'))
+	;
+
+helper def : decode(s : String) : String =
+	s.regexReplaceAll('%3c', '<').regexReplaceAll('%3e', '>');
+
+helper context Pig!Program def: toString(indent: String): String =
+	'REGISTER ./out/artifacts/LoadTurtle_jar/LoadTurtle.jar;\r\n' +
+	'DEFINE extract my.udf.extract;\r\n' +
+	'DEFINE FORMAT my.udf.FORMAT;\r\n' +
+	'DEFINE toBag my.udf.toBag;\r\n' +
+	'DEFINE toTuple my.udf.toTuple;\r\n' +
+	'DEFINE equalCondition my.udf.equalCondition;\r\n' +
+	'DEFINE execFunction my.udf.execFunction;\r\n' +
+	self.blocks->iterate(s; acc : String = '' | acc + thisModule.decode(s.toString())) + 
+	'RDFS = distinct RDFS;\r\n'+
+	'dump RDFS;'
+;
+	
+helper context Pig!Block def: toString(): String =
+	self.statements->iterate(s; acc : String = '' | acc + s.toString() + '\r\n')
+;
+
+helper context Pig!Statement def: toString(): String =
+	''
+;
+
+helper context Pig!Define def: toString(): String =
+	'DEFINE ' + self.newName + ' ' + self.oldName + ';\r\n'
+;
+
+helper context Pig!Default def: toString(): String =
+	'%default '  + self.name + ' \'' + self.value + '\'\r\n'
+;
+
+helper context Pig!Register def: toString(): String =
+	'Register '  + self.value + ';\r\n'
+;
+
+helper context Pig!Foreach def: toString(): String =
+	let n : Integer = self.generate.size() in
+	self.return + ' = foreach ' + self.relation + ' generate \r\n\t' + 
+	self.generate->first().toString() + 
+	self.generate->subSequence(2, n)->iterate(s; acc : String = '' | acc + ',\r\n\t' + s.toString()) +
+	';'
+;
+
+helper context Pig!Cross def: toString(): String =
+	self.return + ' = cross ' + self.relation1.toString()  + ',' + self.relation2.toString() + ';\r\n'
+;
+	
+helper context Pig!Join def: toString(): String =
+	self.return + ' = join ' + self.relation1.toString() + ' by ' + self.by1.toString() + ', '
+	+ self.relation2.toString() + ' by ' + self.by2.toString() + ';\r\n'
+;
+	
+helper context Pig!Load def: toString(): String =
+	self.return + ' = load \'' + self.path.toString() + '\' using ' + self.using.toString() + ';\r\n'
+;
+
+helper context Pig!Union def: toString(): String =
+	self.return + ' = union ' + self.relation1.toString()  + ',' + self.relation2.toString() + ';\r\n'
+;
+
+helper context Pig!Expression def: toString(): String =
+	self.value
+;
+
+helper context Pig!Assignment def: toString(): String =
+	self.left + ' = ' + self.right.toString() + ';\r\n'
+;
+
+helper context Pig!AliasedEntity def: toString(): String =
+	if (self.alias.oclIsUndefined()) then
+		self.exp
+	else
+		self.exp + ' as ' + self.alias
+	endif
+;
+

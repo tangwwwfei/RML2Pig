@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives prefix="hydra:" iri="http://www.w3.org/ns/hydra/core#"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="Author">
+		<logicalSource  iterator="$.author[*]" referenceFormulation="ql:JSONPath">
+			<source>
+				<webAPI template="https://biblio.ugent.be/publication/{publication_id}.json">
+				</webAPI>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.ex.com/author/{ugent_id}"/>
+			<class>ex:Author</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Author">
+			<predicateMaps>
+				<constant value="ex:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Author">
+				<reference value="name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Paper">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleHydra/example.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.ex.com/paper/{id}"/>
+			<class>ex:Paper</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Paper">
+			<predicateMaps>
+				<constant value="ex:author"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Paper" parentTriplesMap="Author">
+				<binding ownTriplesMap="Paper">
+					<reference value="id"/>
+					<variable>publication_id</variable>
+				</binding>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

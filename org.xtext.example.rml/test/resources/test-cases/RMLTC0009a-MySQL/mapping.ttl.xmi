@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="activity:" iri="http://example.com/activity/"/>
+	<directives base="http://example.com/base/"/>
+	<directives prefix="d2rq:" iri="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+	<triplesMaps name="TriplesMap1">
+		<logicalSource  sqlVersion="rr:SQL2008" tableName="student">
+			<source>
+				<database username="root" password="" jdbcDriver="com.mysql.cj.jdbc.Driver" jdbcDSN="CONNECTIONDSN">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/resource/student_{ID}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="foaf:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1">
+				<reference value="Name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="http://example.com/ontology/practises"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1" parentTriplesMap="TriplesMap2">
+				<joinConditions ownTriplesMap="TriplesMap1" parent="ID" child="Sport">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="TriplesMap2">
+		<logicalSource  sqlVersion="rr:SQL2008" tableName="sport">
+			<source>
+				<database username="root" password="" jdbcDriver="com.mysql.cj.jdbc.Driver" jdbcDSN="CONNECTIONDSN">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/resource/sport_{ID}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap2">
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap2">
+				<reference value="Name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

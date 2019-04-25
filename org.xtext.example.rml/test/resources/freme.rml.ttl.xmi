@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="fnml:" iri="http://semweb.mmlab.be/ns/fnml#"/>
+	<directives prefix="fno:" iri="http://w3id.org/function/ontology#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="dbo:" iri="http://dbpedia.org/ontology/"/>
+	<directives prefix="dbf:" iri="http://dbpedia.org/function/"/>
+	<directives prefix="geo:" iri="http://www.w3.org/2003/01/geo/wgs84_pos#"/>
+	<directives prefix="georss:" iri="http://www.georss.org/georss/"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdf:" iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+	<directives prefix="ex:" iri="http://example.org/"/>
+	<directives prefix="grel:" iri="http://users.ugent.be/~bjdmeest/function/grel.ttl#"/>
+	<directives prefix="dd:" iri="http://users.ugent.be/~bjdmeest/function/deduplication.ttl#"/>
+	<directives prefix="cordis:" iri="http://www.freme-project.eu/datasets/cordis/"/>
+	<directives prefix="dbc:" iri="http://dbpedia.org/resource/Category:"/>
+	<directives prefix="doap:" iri="http://usefulinc.com/ns/doap#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="vcard:" iri="http://www.w3.org/2006/vcard/ns#"/>
+	<directives prefix="dbp:" iri="http://dbpedia.org/property/"/>
+	<directives prefix="frp:" iri="http://www.freme-project.eu/ns/"/>
+	<directives prefix="skos:" iri="http://www.w3.org/2004/02/skos/core#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="dc:" iri="http://purl.org/dc/elements/1.1/"/>
+	<triplesMaps name="InstituteMapping">
+		<logicalSource  iterator="$.institutes" referenceFormulation="ql:JSONPath">
+			<source path="/home/pheyvaer/Developer/MapDoc_FREME/grid/grid2.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.freme-project.eu/resource/grid/institutes/{id}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="foaf:primaryTopic"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="wikipedia_url"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="foaf:mbox"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<template value="mailto:{.email_address}"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="foaf:homepage"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="links"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="skos:altLabel"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="acronyms"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="skos:altLabel"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="aliases"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="dc:subject"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="types"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="frp:ipaddress"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="ip_addresses"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="dbo:foundYear"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping">
+				<reference value="established"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="frp:relationship"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping" parentTriplesMap="RelationshipMapping">
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="InstituteMapping">
+			<predicateMaps>
+				<constant value="vcard:hasAddress"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="InstituteMapping" parentTriplesMap="AddressMapping">
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="RelationshipMapping">
+		<logicalSource  iterator="$.institutes.relationships" referenceFormulation="ql:JSONPath">
+			<source path="/home/pheyvaer/Developer/MapDoc_FREME/grid/grid2.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.freme-project.eu/resource/grid/relationships/{type}{label}{id}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="RelationshipMapping">
+			<predicateMaps>
+				<constant value="frp:relationType"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="RelationshipMapping">
+				<reference value="type"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="RelationshipMapping">
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="RelationshipMapping">
+				<reference value="label"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="RelationshipMapping">
+			<predicateMaps>
+				<constant value="dc:identifier"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="RelationshipMapping" parentTriplesMap="InstituteMapping">
+				<joinConditions ownTriplesMap="RelationshipMapping" parent="id" child="id">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="AddressMapping">
+		<logicalSource  iterator="$.institutes.addresses" referenceFormulation="ql:JSONPath">
+			<source path="/home/pheyvaer/Developer/MapDoc_FREME/grid/grid2.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.freme-project.eu/resource/grid/addresses/{lat}{lng}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="vcard:locality"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="city"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="vcard:region"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="state"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="vcard:country-name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="country"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="dbp:iso31661Alpha"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="country_code"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="dbp:provinceIsoCode"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="state_code"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="dbp:zipCode"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="postcode"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="geo:lat"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="lat"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="geo:lng"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="lng"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AddressMapping">
+			<predicateMaps>
+				<constant value="vcard:locality"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AddressMapping">
+				<reference value="geonames_city"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="transit:" iri="http://vocab.org/transit/terms/"/>
+	<directives prefix="wgs84_pos:" iri="http://www.w3.org/2003/01/geo/wgs84_pos#"/>
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="gn:" iri="http://www.geonames.org/ontology#"/>
+	<directives prefix="geosp:" iri="http://www.telegraphis.net/ontology/geography/geography#"/>
+	<triplesMaps name="VenueMapping">
+		<logicalSource  iterator="$" referenceFormulation="ql:JSONPath">
+			<source path="src/test/resources/example4/Venue4.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://loc.example.com/city/{city}"/>
+			<class>schema:City</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="wgs84_pos:lat"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="venue.latitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="wgs84_pos:long"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="venue.longitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="geosp:onContinent"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="continent"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="gn:countryCode"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="country"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

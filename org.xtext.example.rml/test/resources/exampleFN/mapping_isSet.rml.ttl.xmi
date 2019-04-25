@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="fnml:" iri="http://semweb.mmlab.be/ns/fnml#"/>
+	<directives prefix="fno:" iri="http://w3id.org/function/ontology#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="dbo:" iri="http://dbpedia.org/ontology/"/>
+	<directives prefix="dbf:" iri="http://dbpedia.org/function/"/>
+	<directives prefix="geo:" iri="http://www.w3.org/2003/01/geo/wgs84_pos#"/>
+	<directives prefix="georss:" iri="http://www.georss.org/georss/"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdf:" iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+	<directives prefix="ex:" iri="http://www.example.org/"/>
+	<directives prefix="grel:" iri="http://users.ugent.be/~bjdmeest/function/grel.ttl#"/>
+	<directives base="http://example.com/test"/>
+	<triplesMaps name="Person_TemplateMapping">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleFn/input.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.example.org/{id}"/>
+			<class>ex:Test</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Person_TemplateMapping">
+			<predicateMaps>
+				<constant value="dbo:restingPlacePosition"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Person_TemplateMapping" parentTriplesMap="IntermediateCoordinatesGeoMapping">
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="IntermediateCoordinatesGeoMapping">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleFn/input.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.example.org/restPlace/{id}"/>
+			<class>ex:RestPlace</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+			<predicateMaps>
+				<constant value="geo:lon"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+				<reference value="coordinates"/>
+				<equalConditions ownTriplesMap="IntermediateCoordinatesGeoMapping">
+					<functionMaps functionTriplesMap="FunctionValueIsSetIntermediateCoordinatesGeoMapping" ownTriplesMap="IntermediateCoordinatesGeoMapping">
+						<logicalSource ownTriplesMap="IntermediateCoordinatesGeoMapping">
+						</logicalSource>
+						<subjectMap>GeoCoordinates_SubjectMap</subjectMap>
+						<predicateObjectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+							<predicateMaps>
+								<constant value="fno:executes"/>
+							</predicateMaps>
+							<objectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+								<constant value="grel:isSet"/>
+							</objectMaps>
+						</predicateObjectMaps><predicateObjectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+							<predicateMaps>
+								<constant value="grel:valueParameter"/>
+							</predicateMaps>
+							<objectMaps ownTriplesMap="IntermediateCoordinatesGeoMapping">
+								<reference value="coordinates"/>
+							</objectMaps>
+						</predicateObjectMaps>
+					</functionMaps>
+				</equalConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="FunctionValueIsSetIntermediateCoordinatesGeoMapping">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleFn/input.csv"/>
+		</logicalSource>
+		<subjectMap>GeoCoordinates_SubjectMap</subjectMap>
+		<predicateObjectMaps ownTriplesMap="FunctionValueIsSetIntermediateCoordinatesGeoMapping">
+			<predicateMaps>
+				<constant value="fno:executes"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FunctionValueIsSetIntermediateCoordinatesGeoMapping">
+				<constant value="grel:isSet"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="FunctionValueIsSetIntermediateCoordinatesGeoMapping">
+			<predicateMaps>
+				<constant value="grel:valueParameter"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="FunctionValueIsSetIntermediateCoordinatesGeoMapping">
+				<reference value="coordinates"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

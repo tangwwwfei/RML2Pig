@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="activity:" iri="http://example.com/activity/"/>
+	<directives base="http://example.com/base/"/>
+	<directives prefix="d2rq:" iri="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+	<triplesMaps name="TriplesMap1">
+		<logicalSource  iterator="$.results.bindings[*]" referenceFormulation="ql:JSONPath" query="PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0A++++++++++++++PREFIX+foaf%3A+%3Chttp%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F%3E%0D%0A++++++++++++++PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0A++++++++++++++SELECT+%3Ffname+%3Flname%0D%0A++++++++++++++WHERE+%7B%0D%0A+++++++++++++++++++%3Fx++foaf%3AfirstName+%3Ffname+%3B%0D%0A+++++++++++++++++++++++foaf%3AlastName++%3Flname+%3B%0D%0A++++++++++++++%7D">
+			<source>
+				<sparql endpoint="http://localhost:PORT/ds1/sparql" resultFormat="http://www.w3.org/ns/formats/SPARQL_Results_JSON" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="{fname.value}{lname.value}"/>
+			<termtype value="rr:BlankNode"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="foaf:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1">
+				<template value="{fname.value} {lname.value}"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="TriplesMap2">
+		<logicalSource  iterator="$.results.bindings[*]" referenceFormulation="ql:JSONPath" query="PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0A++++++++++++++++PREFIX+foaf%3A+%3Chttp%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F%3E%0D%0A++++++++++++++++PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0A++++++++++++++++SELECT+%3Fcity+%3Ffname+%3Flname%0D%0A++++++++++++++++WHERE+%7B%0D%0A++++++++++++++++++++%3Fx++foaf%3AfirstName+%3Ffname+%3B%0D%0A++++++++++++++++++++++++foaf%3AlastName++%3Flname+%3B%0D%0A++++++++++++++++++++++++%3Chttp%3A%2F%2Fexample.com%2Fcity%3E+%3Fcity+.%0D%0A++++++++++++++++%7D">
+			<source>
+				<sparql endpoint="http://localhost:PORT/ds2/sparql" resultFormat="http://www.w3.org/ns/formats/SPARQL_Results_JSON" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="{fname.value}{lname.value}"/>
+			<termtype value="rr:BlankNode"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap2">
+			<predicateMaps>
+				<constant value="ex:city"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap2">
+				<reference value="city.value"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

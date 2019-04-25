@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="fno:" iri="http://semweb.datasciencelab.be/ns/function#"/>
+	<directives prefix="lib:" iri="http://example.com/library#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix=":" iri="http://example.com/idlab/functions/string/"/>
+	<directives prefix="grel:" iri="http://users.ugent.be/~bjdmeest/function/grel.ttl#"/>
+</rml:Mapping>

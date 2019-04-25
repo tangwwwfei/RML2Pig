@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="rdf:" iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+	<directives prefix="transit:" iri="http://vocab.org/transit/terms/"/>
+	<directives prefix="wgs84_pos:" iri="http://www.w3.org/2003/01/geo/wgs84_pos#"/>
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="gn:" iri="http://www.geonames.org/ontology#"/>
+	<directives prefix="geosp:" iri="http://www.telegraphis.net/ontology/geography/geography#"/>
+	<triplesMaps name="AirportMapping">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleEqual/Airport.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://airport.example.com/{id}"/>
+			<class>transit:Stop</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="AirportMapping">
+			<predicateMaps>
+				<constant value="transit:service"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AirportMapping" parentTriplesMap="BusMapping">
+				<joinConditions ownTriplesMap="AirportMapping" parent="@id" child="bus">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="BusMapping">
+		<logicalSource  iterator="/transport/bus" referenceFormulation="ql:XPath">
+			<source path="src/test/resources/exampleEqual/Transport.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://trans.example.com/busses/{@id}"/>
+			<class>transit:Service</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="BusMapping">
+			<predicateMaps ownTriplesMap="BusMapping">
+				<constant value="transit:stop"/>
+				<equalConditions ownTriplesMap="BusMapping">
+					<condition>!match(%%id%%,\%2225\%22)</condition>
+					<binding ownTriplesMap="BusMapping">
+						<reference value="@id"/>
+						<variable>id</variable>
+					</binding>
+				</equalConditions>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="BusMapping" parentTriplesMap="BusStopMapping">
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="BusStopMapping">
+		<logicalSource  iterator="/transport/bus/route/stop" referenceFormulation="ql:XPath">
+			<source path="src/test/resources/exampleEqual/Transport.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://trans.example.com/stops/{@id}"/>
+			<class>transit:Stop</class>
+		</subjectMap>
+	</triplesMaps>
+</rml:Mapping>

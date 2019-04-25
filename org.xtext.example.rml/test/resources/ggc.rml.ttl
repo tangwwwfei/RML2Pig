@@ -1,0 +1,80 @@
+######################################################################################
+# 1. Prefixes
+######################################################################################
+
+@prefix rr:       <http://www.w3.org/ns/r2rml#>.
+@prefix rml:      <http://semweb.mmlab.be/ns/rml#>.
+@prefix crml:     <http://semweb.mmlab.be/ns/crml#> .
+@prefix ex:       <http://example.com/ns#>.
+@prefix ql:       <http://semweb.mmlab.be/ns/ql#>.
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#>.
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+
+
+######################################################################################
+# 2. Mapping Document Metadata
+######################################################################################
+
+[]  dcterms:title "KB Mappings - GGC";
+    dcterms:description "Describes an RML mapping from the ggc.xml input source to RDF " ;
+    dcterms:creator <http://rml.io/people/AnastasiaDimou> ;
+    dcterms:created "2016-03-18"^^xsd:date;
+    dcterms:modified "2016-03-21"^^xsd:date .
+
+
+######################################################################################
+# 3. Input Sources
+######################################################################################
+
+<#GGC_LogicalSource>
+  rml:source "../V3/Input/Sample/ggc_sample.xml" ;
+  rml:iterator "/root/metadata";
+  rml:referenceFormulation ql:XPath .
+
+
+
+######################################################################################
+# 4. Mapping Definitions
+######################################################################################
+
+<#GGC_Mapping>
+  rml:logicalSource <#GGC_LogicalSource> ;
+
+  rr:subjectMap [ 
+    rr:template "http://data.kb.nl/gcc/{record/leader}";
+    rr:class ex:Leader ];
+
+  rr:predicateObjectMap [
+    rr:predicate rdfs:label;
+    rr:objectMap [
+      rml:reference "record/leader";
+      rr:language "nl" ] ].
+
+
+<#GGC_Resolver_Mapping>
+  rml:logicalSource [
+    rml:source "../V3/Input/Sample/ggc_sample.xml" ;
+    rml:iterator "/root/metadata/srw_dc:dc";
+    rml:referenceFormulation ql:XPath; ];
+
+  rr:subjectMap [ 
+    rml:reference "dc:identifier[@dcx:anchorText=\"Delpher\"]";
+    rr:class ex:Resolver ];
+
+  rr:predicateObjectMap [
+    rr:predicate ex:language;
+    rr:objectMap [
+      rml:reference "dc:language[@xml:lang=\"en\"]";
+      crml:booleanCondition <#SplitCondition> ] ].
+
+
+<#GGC_Picarta_Mapping>
+  rml:logicalSource [
+    rml:source "../KB/V3/Input/Sample/ggc_sample.xml" ;
+    rml:iterator "/root/metadata/srw_dc:dc";
+    rml:referenceFormulation ql:XPath ];
+
+  rr:subjectMap [ 
+    rml:reference "dc:relation";
+    rr:class ex:Picarta ].

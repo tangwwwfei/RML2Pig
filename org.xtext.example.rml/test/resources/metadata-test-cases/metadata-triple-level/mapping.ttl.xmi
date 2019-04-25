@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="activity:" iri="http://example.com/activity/"/>
+	<directives base="http://example.com/base/"/>
+	<triplesMaps name="TriplesMap1">
+		<logicalSource  iterator="$.students[*]" referenceFormulation="ql:JSONPath">
+			<source path="src/test/resources/metadata-test-cases/student.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/resource/student_{ID}"/>
+			<class>http://example.com/ontology/Student</class>
+			<graphMaps>
+				<constant value="http://example.com/graph/students"/>
+			</graphMaps>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="foaf:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1">
+				<reference value="Name"/>
+			</objectMaps>
+			<graphMaps>
+				<constant value="http://example.com/graph/students"/>
+			</graphMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="http://example.com/ontology/practises"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1" parentTriplesMap="TriplesMap2">
+				<joinConditions ownTriplesMap="TriplesMap1" parent="ID" child="Sport">
+				</joinConditions>
+			</objectMaps>
+			<graphMaps>
+				<constant value="http://example.com/graph/practise"/>
+			</graphMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="TriplesMap2">
+		<logicalSource  iterator="$.sports[*]" referenceFormulation="ql:JSONPath">
+			<source path="src/test/resources/metadata-test-cases/sport.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/resource/sport_{ID}"/>
+			<class>http://example.com/ontology/Sport</class>
+			<graphMaps>
+				<constant value="http://example.com/graph/sports"/>
+			</graphMaps>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap2">
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap2">
+				<reference value="Name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

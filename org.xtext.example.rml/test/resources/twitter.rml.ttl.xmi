@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives prefix="prov:" iri="http://www.w3.org/ns/prov#"/>
+	<directives prefix="prov-said:" iri="http://semweb.datasciencelab.be/ns/prov-said/"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="fnml:" iri="http://semweb.mmlab.be/ns/fnml#"/>
+	<directives prefix="fno:" iri="http://w3id.org/function/ontology#"/>
+	<directives prefix="grel:" iri="http://users.ugent.be/~bjdmeest/function/grel.ttl#"/>
+	<directives prefix="ov:" iri="http://open.vocab.org/terms/"/>
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="tsioc:" iri="http://rdfs.org/sioc/types#"/>
+	<directives prefix="fabio:" iri="http://purl.org/spar/fabio/"/>
+	<directives prefix="twitterFN:" iri="http://users.ugent.be/~bjdmeest/function/twitter.ttl#"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="Tweet">
+		<logicalSource  iterator="$.[*]" referenceFormulation="ql:JSONPath">
+			<source path="tweets.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="https://www.example.com/tweet/{id}"/>
+			<class>prov:Entity,ov:MicroblogPost,schema:SocialMediaPosting,tsioc:MicroblogPost,fabio:Tweet</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Tweet">
+			<predicateMaps>
+				<constant value="prov:label"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="schema:articleBody"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Tweet">
+				<reference value="text"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Tweet">
+			<predicateMaps>
+				<constant value="schema:mainEntityOfPage"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Tweet">
+				<template value="https://twitter.com/my_user/status/{id}"/>
+				<datatype value="schema:URL"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Tweet">
+			<predicateMaps>
+				<constant value="prov:wasAttributedTo"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Tweet">
+				<constant value="https://www.example.com/#me"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Tweet">
+			<predicateMaps>
+				<constant value="prov:wasGeneratedBy"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Tweet" parentTriplesMap="Emit">
+				<joinConditions ownTriplesMap="Tweet" parent="id" child="id">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Emit">
+		<logicalSource  iterator="$.[*]" referenceFormulation="ql:JSONPath">
+			<source path="emits.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="https://www.example.com/emit/{id}"/>
+			<class>prov:Activity</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Emit">
+			<predicateMaps>
+				<constant value="prov:type"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Emit">
+				<constant value="prov-said:EmitMessage"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Emit">
+			<predicateMaps>
+				<constant value="prov:startedAtTime"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="prov:endedAtTime"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Emit">
+				<reference value="created_at"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Emit">
+			<predicateMaps>
+				<constant value="prov:wasStartedBy"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Emit">
+				<constant value="https://www.example.com/#me"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

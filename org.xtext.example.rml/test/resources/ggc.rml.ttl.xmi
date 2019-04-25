@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ex:" iri="http://example.com/ns#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<triplesMaps name="GGC_Mapping">
+		<logicalSource  iterator="/root/metadata" referenceFormulation="ql:XPath">
+			<source path="../V3/Input/Sample/ggc_sample.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://data.kb.nl/gcc/{record/leader}"/>
+			<class>ex:Leader</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="GGC_Mapping">
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="GGC_Mapping">
+				<reference value="record/leader"/>
+				<languageTag>nl</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="GGC_Resolver_Mapping">
+		<logicalSource  iterator="/root/metadata/srw_dc:dc" referenceFormulation="ql:XPath">
+			<source path="../V3/Input/Sample/ggc_sample.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<reference value="dc:identifier[@dcx:anchorText=\%22Delpher\%22]"/>
+			<class>ex:Resolver</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="GGC_Resolver_Mapping">
+			<predicateMaps>
+				<constant value="ex:language"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="GGC_Resolver_Mapping">
+				<reference value="dc:language[@xml:lang=\%22en\%22]"/>
+				<booleanConditions>SplitCondition</booleanConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="GGC_Picarta_Mapping">
+		<logicalSource  iterator="/root/metadata/srw_dc:dc" referenceFormulation="ql:XPath">
+			<source path="../KB/V3/Input/Sample/ggc_sample.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<reference value="dc:relation"/>
+			<class>ex:Picarta</class>
+		</subjectMap>
+	</triplesMaps>
+</rml:Mapping>

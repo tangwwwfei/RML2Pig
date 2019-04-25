@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="crm:" iri="http://www.cidoc-crm.org/cidoc-crm/"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<triplesMaps name="MusicEvent">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="http://rml.io/rml/data/csvw/events/events-listing.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<termtype value="rr:BlankNode"/>
+			<class>schema:MusicEvent</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="MusicEvent">
+			<predicateMaps>
+				<constant value="schema:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="MusicEvent">
+				<reference value="Name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="MusicEvent">
+			<predicateMaps>
+				<constant value="schema:startDate"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="MusicEvent">
+				<reference value="StartDate"/>
+				<datatype value="schema:Date"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="MusicEvent">
+			<predicateMaps>
+				<constant value="schema:location"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="MusicEvent" parentTriplesMap="Place">
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="MusicEvent">
+			<predicateMaps>
+				<constant value="schema:offers"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="MusicEvent" parentTriplesMap="Offer">
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Place">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="http://rml.io/rml/data/csvw/events/events-listing.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<termtype value="rr:BlankNode"/>
+			<class>schema:Place</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Place">
+			<predicateMaps>
+				<constant value="schema:address"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Place">
+				<reference value="location_address"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Place">
+			<predicateMaps>
+				<constant value="schema:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Place">
+				<reference value="location_name"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Offer">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="http://rml.io/rml/data/csvw/events/events-listing.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<termtype value="rr:BlankNode"/>
+			<class>schema:Offer</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Offer">
+			<predicateMaps>
+				<constant value="schema:url"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Offer">
+				<reference value="ticket_url"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

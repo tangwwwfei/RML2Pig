@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="person:" iri="http://www.w3.org/ns/person#"/>
+	<directives prefix="adms:" iri="http://www.w3.org/ns/adms#"/>
+	<directives prefix="skos:" iri="http://www.w3.org/2004/02/skos/core#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="adms:" iri="http://www.w3.org/ns/adms#"/>
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="geobio:" iri="http://geobio.lod.usp.br/"/>
+	<directives prefix="dbpedia:" iri="http://dbpedia.org/ontology/"/>
+	<directives prefix="time:" iri="http://www.w3.org/2006/time#"/>
+	<directives prefix="taxon:" iri="http://purl.org/catalogueoflife/1/"/>
+	<directives prefix="sf:" iri="http://www.opengis.net/ont/sf#"/>
+	<triplesMaps name="EmbrapaBioData">
+		<logicalSource  referenceFormulation="ql:XLSX">
+			<source path="src/test/resources/exampleXLSX/Embrapa.xlsx"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://geobio.lod.usp.br/embrapa/id/{Code}"/>
+			<class>adms:Identifier</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="skos:notation"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<reference value="Code"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="geobio:datelastmodified"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<reference value="datelastmodified"/>
+				<datatype value="xsd:dateTime"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="dcterms:identifier"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<reference value="institutioncode"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="dcterms:description"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<reference value="catalognumber"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="time:year"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<reference value="yearidentified"/>
+				<datatype value="xsd:gYear"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="time:month"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<template value="--{monthidentified}"/>
+				<datatype value="xsd:gMonth"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="EmbrapaBioData">
+			<predicateMaps>
+				<constant value="time:day"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="EmbrapaBioData">
+				<template value="---{dayidentified}"/>
+				<datatype value="xsd:gDay"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

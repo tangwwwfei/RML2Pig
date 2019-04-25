@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="sd:" iri="http://www.w3.org/ns/sparql-service-description#"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="hydra:" iri="http://www.w3.org/ns/hydra/core#"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="Country">
+		<logicalSource  iterator="$.results.bindings[*]" referenceFormulation="ql:JSONPath" query="PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0A++++++++++++PREFIX+foaf%3A+%3Chttp%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F%3E%0D%0A++++++++++++PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0A++++++++++++SELECT+%3FFirstName+%3FLastName+%3FID%0D%0A++++++++++++WHERE+%7B%0D%0A++++++++++++++++%3Fx++foaf%3AfirstName+%3FFirstName+%3B%0D%0A++++++++++++++++++++foaf%3AlastName++%3FLastName+%3B%0D%0A++++++++++++++++++++rdf%3AID+++++++++%3FID+.%0D%0A++++++++++++%7D">
+			<source>
+				<sparql endpoint="http://localhost:PORT/ds1/sparql" resultFormat="http://www.w3.org/ns/formats/SPARQL_Results_JSON" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://example.com/Student/{ID.value}/{FirstName.value}"/>
+			<graphMaps>
+				<constant value="ex:PersonGraph"/>
+			</graphMaps>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Country">
+			<predicateMaps>
+				<constant value="rdf:type"/>
+			</predicateMaps>
+			<objectMaps>
+				<constant value="foaf:Person"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="Country">
+			<predicateMaps>
+				<constant value="foaf:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Country">
+				<reference value="FirstName.value"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

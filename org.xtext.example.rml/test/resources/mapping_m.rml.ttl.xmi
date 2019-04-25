@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="schema:" iri="http://schema.org/"/>
+	<directives prefix="dc:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="dbo:" iri="http://dbpedia.org/ontology/"/>
+	<directives base="https://betweenourworlds.org/mapping/"/>
+	<triplesMaps name="ActionStatusType">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="./actionstatustypes.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="https://betweenourworlds.org/actionstatus/{slug}"/>
+			<class>schema:ActionStatusType,schema:Enumeration,schema:Intangible,schema:Thing</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="ActionStatusType">
+			<predicateMaps>
+				<constant value="schema:name"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="rdfs:label"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="dbo:title"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="dc:title"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="ActionStatusType">
+				<reference value="label"/>
+				<languageTag>en</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="ActionStatusType">
+			<predicateMaps>
+				<constant value="schema:alternateName"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="ActionStatusType">
+				<reference value="alternativelabel"/>
+				<languageTag>en</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="ActionStatusType">
+			<predicateMaps>
+				<constant value="schema:description"/>
+			</predicateMaps>
+			<predicateMaps>
+				<constant value="rdfs:comment"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="ActionStatusType">
+				<reference value="description"/>
+				<languageTag>en</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

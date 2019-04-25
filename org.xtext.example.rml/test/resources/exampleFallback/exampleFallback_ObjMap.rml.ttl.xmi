@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="dcat:" iri="http://www.w3.org/ns/dcat#"/>
+	<directives prefix="sd:" iri="http://www.w3.org/ns/sparql-service-description#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="Companies">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleFallback/Companies.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://ex.com/comp/{id}"/>
+			<class>ex:Company</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Companies">
+			<predicateMaps>
+				<constant value="ex:country"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Companies" parentTriplesMap="Country_DBpedia">
+				<joinConditions ownTriplesMap="Companies" parent="sparql:binding/sparql:literal" child="country">
+				</joinConditions>
+				<fallbackMaps ownTriplesMap="Companies" parentTriplesMap="Country_Local">
+				</fallbackMaps>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="City_DBpedia">
+		<logicalSource  iterator="/sparql:sparql/sparql:results/sparql:result" referenceFormulation="ql:XPath" query="SELECT+DISTINCT+%3FcountryName+%3Fcountry+WHERE+%7B%0D%0A%3Fcountry+a+dbo%3ACountry%3B+rdfs%3Alabel+%3FcountryName+.%0D%0AFILTER+%28+lang%28%3FcountryName%29+%3D+%2522en%2522+%29+%7D%0D%0AORDER+BY+DESC%28%3FcountryName%29%0D%0ALIMIT+7000">
+			<source>
+				<sparql endpoint="http://dbpedia.org/sparql/" resultFormat="http://www.w3.org/ns/formats/SPARQL_Results_XML" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<reference value="sparql:binding/sparql:uri"/>
+			<termtype value="rr:IRI"/>
+		</subjectMap>
+	</triplesMaps>
+	<triplesMaps name="Country_Local">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleFallback/Companies.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://ex.com/country/{country}"/>
+		</subjectMap>
+	</triplesMaps>
+	<triplesMaps name="Country_DBpedia">
+		<logicalSource  iterator="/sparql:sparql/sparql:results/sparql:result" referenceFormulation="ql:XPath" query="SELECT+DISTINCT+%3FcountryName+%3Fcountry+WHERE+%7B%0D%0A%3Fcountry+a+dbo%3ACountry%3B+rdfs%3Alabel+%3FcountryName+.%0D%0AFILTER+%28+lang%28%3FcountryName%29+%3D+%2522en%2522+%29+%7D%0D%0AORDER+BY+DESC%28%3FcountryName%29%0D%0ALIMIT+7000">
+			<source>
+				<sparql endpoint="http://dbpedia.org/sparql/" resultFormat="http://www.w3.org/ns/formats/SPARQL_Results_XML" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<reference value="sparql:binding/sparql:uri"/>
+			<termtype value="rr:IRI"/>
+		</subjectMap>
+	</triplesMaps>
+</rml:Mapping>

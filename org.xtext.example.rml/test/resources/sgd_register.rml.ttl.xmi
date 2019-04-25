@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ex:" iri="http://example.com/ns#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<directives prefix="sgd:" iri="http://www.kb.nl/namespaces/handelingen"/>
+	<directives prefix="hydra:" iri="http://www.w3.org/ns/hydra/core#"/>
+	<triplesMaps name="SGD_register_Mapping">
+		<logicalSource  iterator="/data/metadata/srw_dc:dc" referenceFormulation="ql:XPath">
+			<source path="Input/Sample/sgd_register_sample.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<reference value="dc:identifier"/>
+			<termtype value="rr:IRI"/>
+			<class>ex:Lemma</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="SGD_register_Mapping">
+			<predicateMaps>
+				<constant value="sgd:registerUri"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="SGD_register_Mapping" parentTriplesMap="Register_Mapping">
+				<binding ownTriplesMap="SGD_register_Mapping">
+					<reference value="sgd:registerUri"/>
+					<termtype value="rr:IRI"/>
+					<variable>file</variable>
+				</binding>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Register_Mapping">
+		<logicalSource  iterator="/*[name()='OAI-PMH']/*[name()='GetRecord']/*[name()='record']/*[name()='header']" referenceFormulation="ql:XPath">
+			<source>
+				<webAPI template="{file}">
+				</webAPI>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://data.kb.nl/sgd/document/{//*[name()='identifier']}"/>
+			<class>ex:Register</class>
+		</subjectMap>
+	</triplesMaps>
+</rml:Mapping>

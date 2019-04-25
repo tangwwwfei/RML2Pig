@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="foaf:" iri="http://xmlns.com/foaf/0.1/"/>
+	<directives prefix="ex:" iri="http://example.com/"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="d2rq:" iri="http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#"/>
+	<directives base="http://example.com/base/"/>
+	<triplesMaps name="TriplesMap1">
+		<logicalSource  sqlVersion="rr:SQL2008" tableName="persons">
+			<source>
+				<database username="postgres" password="password" jdbcDriver="org.postgresql.Driver" jdbcDSN="CONNECTIONDSN">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="{fname}{lname}"/>
+			<termtype value="rr:BlankNode"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap1">
+			<predicateMaps>
+				<constant value="foaf:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap1">
+				<template value="{fname} {lname}"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="TriplesMap2">
+		<logicalSource  sqlVersion="rr:SQL2008" tableName="lives">
+			<source>
+				<database username="postgres" password="password" jdbcDriver="org.postgresql.Driver" jdbcDSN="CONNECTIONDSN">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="{fname}{lname}"/>
+			<termtype value="rr:BlankNode"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TriplesMap2">
+			<predicateMaps>
+				<constant value="ex:city"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TriplesMap2">
+				<reference value="city"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="crml:" iri="http://semweb.mmlab.be/ns/crml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="mail:" iri="http://example.com/mail#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="sd:" iri="http://www.w3.org/ns/sparql-service-description#"/>
+	<directives prefix="ex:" iri="http://www.example.com/"/>
+	<directives prefix="hydra:" iri="http://www.w3.org/ns/hydra/core#"/>
+	<directives base="http://example.com/base"/>
+	<triplesMaps name="Country">
+		<logicalSource  iterator="$.results.bindings[*]" referenceFormulation="ql:JSONPath" query="SELECT+%3Fresource_uri+%3Ffr_label%0D%0A++++++++++++WHERE+%7B%0D%0A++++++++++++++++%3Fresource_uri+a+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FCountry%3E+%3B%0D%0A++++++++++++++++rdfs%3Alabel+%5C%2522%25%25country%25%25%5C%2522%40en+%2C+%3Ffr_label+.%0D%0A++++++++++++++++FILTER%28lang%28%3Ffr_label%29+%3D+%2522fr%2522%29%0D%0A++++++++++++%7D">
+			<source>
+				<sparql endpoint="http://dbpedia.org/sparql" resultFormat="http://www.w3.org/ns/formats/data/SPARQL_Results_XML" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<reference value="resource_uri.value"/>
+			<termtype value="rr:IRI"/>
+			<class>ex:Country</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Country">
+			<predicateMaps>
+				<constant value="ex:name"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Country">
+				<reference value="fr_label.value"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="Paper">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="src/test/resources/exampleHydraSPARQLsd/example.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://www.ex.com/paper/{id}"/>
+			<class>ex:Paper</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="Paper">
+			<predicateMaps>
+				<constant value="ex:country"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="Paper" parentTriplesMap="Country">
+				<binding ownTriplesMap="Paper">
+					<reference value="country"/>
+					<variable>country</variable>
+				</binding>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

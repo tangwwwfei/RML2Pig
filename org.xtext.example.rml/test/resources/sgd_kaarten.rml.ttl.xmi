@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ex:" iri="http://example.com/ns#"/>
+	<directives prefix="geosparql:" iri="http://www.opengis.net/ont/geosparql#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="dcterms:" iri="http://purl.org/dc/terms/"/>
+	<triplesMaps name="SGD_Kaarten_Mapping">
+		<logicalSource  iterator="/data/metadata/srw_dc:dc" referenceFormulation="ql:XPath">
+			<source path="Input/Sample/sgd_kaarten_sample.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<termtype value="rr:BlankNode"/>
+			<class>ex:Record</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+			<predicateMaps ownTriplesMap="SGD_Kaarten_Mapping">
+				<constant value="dcterms:title"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+				<reference value="dc:title"/>
+				<languageTag>nl</languageTag>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+			<predicateMaps ownTriplesMap="SGD_Kaarten_Mapping">
+				<constant value="dcterms:date"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+				<reference value="dc:date"/>
+				<datatype value="xsd:gYear"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+			<predicateMaps>
+				<constant value="geosparql:asWKT"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="SGD_Kaarten_Mapping">
+				<template value="MULTIPOLYGON((({dcterms:spatial})))"/>
+				<datatype value="http://www.openlinksw.com/schemas/virtrdf#Geometry"/>
+				<termtype value="rr:Literal"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>
