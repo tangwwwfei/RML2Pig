@@ -1,12 +1,7 @@
-import ch.vorburger.exec.ManagedProcessException;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
-import lombok.Data;
 import lombok.Getter;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.jdbc.ScriptRunner;
-import org.junit.AfterClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -30,7 +23,7 @@ public class SQLServerUtil extends DBUtil {
 
     private static final Boolean LOCAL_TESTING = !Boolean.valueOf(System.getenv("CI"));
 
-    private static Logger logger = LoggerFactory.getLogger(SQLTest.class);
+    private static Logger logger = LoggerFactory.getLogger(SQLServerUtil.class);
 
     private static String CONNECTIONSTRING = LOCAL_TESTING ?
             "jdbc:sqlserver://dia.test.iminds.be:8971;user=sa;password=YourSTRONG!Passw0rd;databaseName=TestDB;" :
@@ -39,7 +32,7 @@ public class SQLServerUtil extends DBUtil {
     private static HashSet<String> tempFiles = new HashSet<>();
 
     @Getter
-    private SQLTest.DockerDBInfo remoteDB;
+    private SQLServerUtil.DockerDBInfo remoteDB;
 
     private class DockerDBInfo {
         String connectionString;
@@ -64,7 +57,7 @@ public class SQLServerUtil extends DBUtil {
     }
 
     public void startDB() {
-        remoteDB = new SQLTest.DockerDBInfo(CONNECTIONSTRING);
+        remoteDB = new SQLServerUtil.DockerDBInfo(CONNECTIONSTRING);
         try {
             final Connection conn = DriverManager.getConnection(remoteDB.connectionString.substring(0, remoteDB.connectionString.lastIndexOf("databaseName=")));
             conn.createStatement().execute("CREATE DATABASE TestDB");
@@ -100,7 +93,7 @@ public class SQLServerUtil extends DBUtil {
     }
 
 
-    private void closeDocker(SQLTest.DockerDBInfo dockerDBInfo) {
+    private void closeDocker(SQLServerUtil.DockerDBInfo dockerDBInfo) {
         if (dockerDBInfo != null && dockerDBInfo.docker != null) {
             try {
                 // Kill container

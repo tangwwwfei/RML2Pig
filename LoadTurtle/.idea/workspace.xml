@@ -6,16 +6,7 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="21551cbe-086e-44ed-8f68-6bd3979e9d73" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/SPARQLUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/r2ps/loadfunc/DataRetrieval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/r2ps/loadfunc/DataRetrieval.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/r2ps/parser/ParseData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/r2ps/parser/ParseData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/DBUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/DBUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/PigStdTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/PigStdTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/TestUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/TestUtil.java" afterDir="false" />
-    </list>
+    <list default="true" id="21551cbe-086e-44ed-8f68-6bd3979e9d73" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,7 +40,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="MavenImportPreferences">
@@ -83,14 +74,14 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="dynamic.classpath" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../pig-test-runner" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15527344" />
     <property name="project.structure.side.proportion" value="0.31828704" />
-    <property name="settings.editor.selected.configurable" value="reference.settings.project.maven.importing" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -312,6 +303,7 @@
       <workItem from="1586973674010" duration="413000" />
       <workItem from="1586974102426" duration="3683000" />
       <workItem from="1586977929455" duration="3821000" />
+      <workItem from="1587021653890" duration="216000" />
     </task>
     <task id="LOCAL-00001" summary="db test files">
       <created>1586965956153</created>
@@ -389,22 +381,22 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="741" y="280" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1586973104818" />
-    <state width="1878" height="374" key="GridCell.Tab.0.bottom" timestamp="1586981774571">
+    <state width="1878" height="374" key="GridCell.Tab.0.bottom" timestamp="1587021787065">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1878" height="374" key="GridCell.Tab.0.bottom/0.0.1920.1050@0.0.1920.1050" timestamp="1586981774571" />
-    <state width="1878" height="374" key="GridCell.Tab.0.center" timestamp="1586981774571">
+    <state width="1878" height="374" key="GridCell.Tab.0.bottom/0.0.1920.1050@0.0.1920.1050" timestamp="1587021787065" />
+    <state width="1878" height="374" key="GridCell.Tab.0.center" timestamp="1587021787065">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1878" height="374" key="GridCell.Tab.0.center/0.0.1920.1050@0.0.1920.1050" timestamp="1586981774571" />
-    <state width="1878" height="374" key="GridCell.Tab.0.left" timestamp="1586981774571">
+    <state width="1878" height="374" key="GridCell.Tab.0.center/0.0.1920.1050@0.0.1920.1050" timestamp="1587021787065" />
+    <state width="1878" height="374" key="GridCell.Tab.0.left" timestamp="1587021787065">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1878" height="374" key="GridCell.Tab.0.left/0.0.1920.1050@0.0.1920.1050" timestamp="1586981774571" />
-    <state width="1878" height="374" key="GridCell.Tab.0.right" timestamp="1586981774571">
+    <state width="1878" height="374" key="GridCell.Tab.0.left/0.0.1920.1050@0.0.1920.1050" timestamp="1587021787065" />
+    <state width="1878" height="374" key="GridCell.Tab.0.right" timestamp="1587021787065">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1878" height="374" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1586981774571" />
+    <state width="1878" height="374" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1587021787065" />
     <state width="1878" height="284" key="GridCell.Tab.1.bottom" timestamp="1586981698153">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -425,10 +417,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="491" y="180" key="Maven.ArtifactSearchDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1586466354601" />
-    <state x="462" y="167" key="SettingsEditor" timestamp="1586975920896">
+    <state x="462" y="167" key="SettingsEditor" timestamp="1587021691463">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="462" y="167" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1586975920896" />
+    <state x="462" y="167" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1587021691463" />
     <state width="966" height="524" key="XDebugger.FullValuePopup" timestamp="1586981171239">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

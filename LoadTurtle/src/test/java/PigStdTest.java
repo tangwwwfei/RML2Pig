@@ -1,19 +1,10 @@
 import ch.vorburger.exec.ManagedProcessException;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
-import org.apache.jena.fuseki.main.FusekiServer;
-import org.apache.jena.query.*;
-import org.apache.jena.rdfconnection.RDFConnectionFuseki;
-import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.pig.ExecType;
 import org.apache.pig.backend.hadoop.datastorage.HDataStorage;
 import org.apache.pig.backend.hadoop.datastorage.HDirectory;
-import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.PigContext;
 import org.apache.pig.pigunit.Cluster;
 import org.apache.pig.pigunit.PigTest;
@@ -25,13 +16,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.function.Consumer;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class PigStdTest {
 
@@ -44,7 +30,7 @@ public class PigStdTest {
     @AfterClass
     public static void cleanup() throws IOException {
         //DBUtil.stopDBs();
-        List<File> files = TestUtil.listAllFiles("../test/resources/passed/test-cases/", "^(158|\\.158).*");
+        List<File> files = TestUtil.listAllFiles("../test-cases/resources/passed/test-cases/", "^(158|\\.158).*");
         for(File file : files) {
             System.out.println("Delete file：" + file.getCanonicalPath());
             FileUtils.deleteQuietly(new File(file.getCanonicalPath()));
@@ -57,38 +43,13 @@ public class PigStdTest {
         HDirectory desc = (HDirectory) dfs.getActiveContainer();
         return;
     }
-    /*package*/ static DatasetGraph dataset() {
-        return DatasetGraphFactory.createTxnMem();
-    }
-
-    /*package*/ static void query(String URL, String query, Consumer<QueryExecution> body) {
-        try (QueryExecution qExec = QueryExecutionFactory.sparqlService(URL, query)) {
-            body.accept(qExec);
-        }
-    }
-
-    @Test
-    public void embedded_01() throws IOException {
-        DatasetGraph dsg = dataset();
-        ServerSocket socket =new ServerSocket(0);
-        int port = 3330;//socket.getLocalPort();   // Default port.
-        System.out.println(port);
-        FusekiServer server = FusekiServer.create().add("/ds", dsg).build();
-        assertTrue(server.getDataAccessPointRegistry().isRegistered("/ds"));
-        server.start();
-        query("http://localhost:" + port + "/ds/query", "SELECT * { ?s ?p ?o}", qExec -> {
-            ResultSet rs = qExec.execSelect();
-            assertFalse(rs.hasNext());
-        });
-        server.stop();
-    }
 
     @Test
     public void test_sqlserver() throws IOException, SQLException, ManagedProcessException, ParseException {
         String startFrom = "RMLTC0008b";
         boolean bSkip = false;
         DBUtil dbUtil = null;
-        List<File> files = TestUtil.listAllFiles("../test/resources/passed/", ".*\\.pig$");
+        List<File> files = TestUtil.listAllFiles("../test-cases/resources/passed/", ".*\\.pig$");
         for(File pigScriptFile : files) {
             boolean bStartDBs = false;
             String pigScript = pigScriptFile.getCanonicalPath();
@@ -179,10 +140,8 @@ public class PigStdTest {
             }
             //run pig script
             PigTest pigTest = new PigTest(pigScript, null, pigServer, cluster);
-            //PigTest.getPigServer().getPigContext().set
             //load expected results
             String[] expected = TestUtil.loadResult(curDir);
-            //pigTest.runScript();
             pigTest.assertOutputAnyOrder("result", expected);
             pigServer.shutdown();
             System.setProperty("user.dir", oldDir);
