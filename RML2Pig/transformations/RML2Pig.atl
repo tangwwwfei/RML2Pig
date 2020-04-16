@@ -32,16 +32,10 @@ rule generateMapping(mapping : RML!Mapping){
 		program : Pig!Program(
 			absolutePath <- mapping.AbsolutePath,
 			statements <- mapping.triplesMaps->collect(t | thisModule.GenerateLogicalSource(t)),
-			--statements <- thisModule.mapOfTable->getKeys()->collect(e | thisModule.GenerateTable(e)),
 			statements <- mapping.triplesMaps->collect(t | thisModule.GenerateSubjectMap(t)),
 			statements <- mapping.triplesMaps->collect(t | thisModule.GenerateAllTermMaps(t)),
-			statements <- thisModule.GenerateDirectives(mapping.directives)--mapping.directives->collect(e | thisModule.Namespace2Foreach(e))
+			statements <- thisModule.GenerateDirectives(mapping.directives)
 		)
-	do{
-		--statements <- thisModule.mapOfTable->getKeys()->collect(e | thisModule.GenerateTable(e))
-		--thisModule.debug(mapping.AbsolutePath);
-		thisModule.debug('Tranformations completed!');
-	}
 }
 
 --To find all template value and reference value
