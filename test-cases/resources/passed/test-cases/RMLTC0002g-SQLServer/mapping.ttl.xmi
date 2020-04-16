@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<AbsolutePath>E:\RML2PigAndScala\test\resources\passed\test-cases\RMLTC0002g-SQLServer\mapping.ttl</AbsolutePath>
+	<directives prefix="rr:" iri="&lt;http://www.w3.org/ns/r2rml#&gt;"/>
+	<directives prefix="foaf:" iri="&lt;http://xmlns.com/foaf/0.1/&gt;"/>
+	<directives prefix="ex:" iri="&lt;http://example.com/&gt;"/>
+	<directives prefix="xsd:" iri="&lt;http://www.w3.org/2001/XMLSchema#&gt;"/>
+	<directives prefix="rml:" iri="&lt;http://semweb.mmlab.be/ns/rml#&gt;"/>
+	<directives prefix="ql:" iri="&lt;http://semweb.mmlab.be/ns/ql#&gt;"/>
+	<directives base="&lt;http://example.com/base/&gt;"/>
+	<directives prefix="d2rq:" iri="&lt;http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#&gt;"/>
+	<triplesMaps name="&lt;TriplesMap1&gt;">
+		<logicalSource  referenceFormulation="ql:CSV" query="&quot;SELECT+kjnqsdjfbqsdjfmsdnfm+FROM+student&quot;" sqlVersion="rr:SQL2008">
+			<source>
+				<database username="&quot;sa&quot;" password="&quot;YourSTRONG!Passw0rd;&quot;" jdbcDriver="&quot;com.microsoft.sqlserver.jdbc.SQLServerDriver&quot;" jdbcDSN="&quot;CONNECTIONDSN&quot;">
+				</database>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="&quot;http://example.com/{ID}/{Name}&quot;"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="&lt;TriplesMap1&gt;">
+			<predicateMaps>
+				<constant value="ex:id"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="&lt;TriplesMap1&gt;">
+				<reference value="&quot;IDs&quot;"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

@@ -6,6 +6,7 @@
         eType="#//Directive" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="triplesMaps" upperBound="-1"
         eType="#//TriplesMap" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="AbsolutePath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Directive">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="prefix" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -16,8 +17,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="logicalSource" eType="#//LogicalSource"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="subjectMap" eType="#//SubjectMap"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subjectMap" upperBound="-1"
+        eType="#//SubjectMap" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="predicateObjectMaps" upperBound="-1"
         eType="#//PredicateObjectMap" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dctermsType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -82,6 +83,7 @@
         eType="#//RMLCondition/BooleanCondition" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="bindingConditions" upperBound="-1"
         eType="#//RMLCondition/BindingCondition" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="languageMap" eType="#//LanguageMap"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReferencingObjectMap">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="parentTriplesMap" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -150,6 +152,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ownTriplesMap" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="column" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="languageTag" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="languageMap" eType="#//LanguageMap"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CLASS">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -168,6 +171,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="ParentTermMap" eSuperTypes="#//TermMap"/>
   <eClassifiers xsi:type="ecore:EEnum" name="tm">
     <eLiterals name="IRI"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LanguageMap">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reference" eType="#//Reference"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="constant" eType="#//Constant"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ownTriplesMap" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eSubpackages name="RMLCondition" nsURI="http://rml.io/rmlcondition" nsPrefix="rmlcondition">
     <eClassifiers xsi:type="ecore:EClass" name="BindingCondition" eSuperTypes="#//RMLCondition/Condition">

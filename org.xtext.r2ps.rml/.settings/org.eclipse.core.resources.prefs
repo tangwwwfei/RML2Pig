@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+encoding//src/org/xtext/r2ps/rml/generator/DataRetrieval.xtend=UTF-8
+encoding//src/org/xtext/r2ps/rml/generator/Helper.xtend=UTF-8
+encoding//src/org/xtext/r2ps/rml/generator/LogicalSource.xtend=UTF-8
+encoding//src/org/xtext/r2ps/rml/generator/PredicateObjectMap.xtend=UTF-8
+encoding//src/org/xtext/r2ps/rml/generator/RMLGenerator.xtend=UTF-8
+encoding//src/org/xtext/r2ps/rml/generator/SubjectMap.xtend=UTF-8
+encoding/<project>=GBK

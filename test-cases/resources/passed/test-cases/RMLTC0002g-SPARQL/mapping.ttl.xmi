@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<AbsolutePath>E:\RML2PigAndScala\test\resources\passed\test-cases\RMLTC0002g-SPARQL\mapping.ttl</AbsolutePath>
+	<directives prefix="rr:" iri="&lt;http://www.w3.org/ns/r2rml#&gt;"/>
+	<directives prefix="rml:" iri="&lt;http://semweb.mmlab.be/ns/rml#&gt;"/>
+	<directives prefix="crml:" iri="&lt;http://semweb.mmlab.be/ns/crml#&gt;"/>
+	<directives prefix="ql:" iri="&lt;http://semweb.mmlab.be/ns/ql#&gt;"/>
+	<directives prefix="mail:" iri="&lt;http://example.com/mail#&gt;"/>
+	<directives prefix="xsd:" iri="&lt;http://www.w3.org/2001/XMLSchema#&gt;"/>
+	<directives prefix="sd:" iri="&lt;http://www.w3.org/ns/sparql-service-description#&gt;"/>
+	<directives prefix="ex:" iri="&lt;http://example.com/&gt;"/>
+	<directives prefix="hydra:" iri="&lt;http://www.w3.org/ns/hydra/core#&gt;"/>
+	<directives base="&lt;http://example.com/base&gt;"/>
+	<triplesMaps name="&lt;#Country&gt;">
+		<logicalSource  iterator="&quot;$.results.bindings[*]&quot;" referenceFormulation="ql:JSONPath" query="&quot;PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E+PREFIX+foaf%3A+%3Chttp%3A%2F%2Fxmlns.com%2Ffoaf%2F0.1%2F%3E+PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E+SELECT+qsdfqsdf+sqdfqsdfsd+%3FNsdfqs+ame+%3FID+qmsndfknqskfmdnemznfmkznfmizmnknfmz+WHERE+%7B+%3Fx+foaf%3Aname+%3FName+%3B+rdf%3AID+%3FID+.+%7D&quot;">
+			<source>
+				<sparql endpoint="&lt;http://localhost:PORT/ds1/sparql&gt;" resultFormat="&lt;http://www.w3.org/ns/formats/SPARQL_Results_JSON&gt;" supportedLanguage="sd:SPARQL11Query">
+				</sparql>
+			</source>
+		</logicalSource>
+		<subjectMap>
+			<template value="&quot;http://example.com/{ID.value}/{Name.value}&quot;"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="&lt;#Country&gt;">
+			<predicateMaps>
+				<constant value="ex:id"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="&lt;#Country&gt;">
+				<reference value="&quot;IDs&quot;"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

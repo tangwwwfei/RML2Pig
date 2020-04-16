@@ -1,7 +1,0 @@
-eclipse.preferences.version=1
-encoding//src/org/xtext/example/rml/generator/DataRetrieval.xtend=UTF-8
-encoding//src/org/xtext/example/rml/generator/Helper.xtend=UTF-8
-encoding//src/org/xtext/example/rml/generator/IRMLGenerator.xtend=UTF-8
-encoding//src/org/xtext/example/rml/generator/LogicalSource.xtend=UTF-8
-encoding//src/org/xtext/example/rml/generator/SubjectMap.xtend=UTF-8
-encoding/<project>=GBK

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<AbsolutePath>E:\RML2PigAndScala\test\resources\passed\test-cases\RMLTC1010-CSV\mapping.ttl</AbsolutePath>
+	<directives prefix="rr:" iri="&lt;http://www.w3.org/ns/r2rml#&gt;"/>
+	<directives prefix="rml:" iri="&lt;http://semweb.mmlab.be/ns/rml#&gt;"/>
+	<directives prefix="rdf:" iri="&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;"/>
+	<directives prefix="rdfs:" iri="&lt;http://www.w3.org/2000/01/rdf-schema#&gt;"/>
+	<directives prefix="ql:" iri="&lt;http://semweb.mmlab.be/ns/ql#&gt;"/>
+	<directives prefix="map:" iri="&lt;http://mapping.example.com/&gt;"/>
+	<triplesMaps name="map:map_person_0">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="&quot;data.csv&quot;"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="&quot;http://example.com/{name}&quot;"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="map:map_person_0">
+			<predicateMaps ownTriplesMap="map:map_person_0">
+				<constant value="&lt;http://example.com/name&gt;"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="map:map_person_0">
+				<template value="&quot;http://{name}&quot;"/>
+				<termtype value="rr:IRI"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

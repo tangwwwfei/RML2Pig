@@ -1,31 +1,27 @@
 query 
 	Pig2Text = 
 		Pig!Program.allInstances()->
-			collect(c| c.toString().writeTo('C:/eclipse-workspace/RML2Pig/samples/output.pig'))
+			collect(c| c.toString().writeTo(c.absolutePath+'.pig'))
 	;
+
+
 
 helper def : decode(s : String) : String =
 	s.regexReplaceAll('%3c', '<').regexReplaceAll('%3e', '>');
 
 helper context Pig!Program def: toString(indent: String): String =
-	'REGISTER ./out/artifacts/LoadTurtle_jar/LoadTurtle.jar;\r\n' +
-	'DEFINE extract my.udf.extract;\r\n' +
-	'DEFINE FORMAT my.udf.FORMAT;\r\n' +
-	'DEFINE toBag my.udf.toBag;\r\n' +
-	'DEFINE toTuple my.udf.toTuple;\r\n' +
-	'DEFINE equalCondition my.udf.equalCondition;\r\n' +
-	'DEFINE execFunction my.udf.execFunction;\r\n' +
-	self.blocks->iterate(s; acc : String = '' | acc + thisModule.decode(s.toString())) + 
-	'RDFS = distinct RDFS;\r\n'+
-	'dump RDFS;'
-;
-	
-helper context Pig!Block def: toString(): String =
-	self.statements->iterate(s; acc : String = '' | acc + s.toString() + '\r\n')
-;
-
-helper context Pig!Statement def: toString(): String =
-	''
+	--'%default current_date `date +%Y-%m-%d-%H-%M-%S`\r\n'+
+	'REGISTER file:///E:/RML2PigAndScala/LoadTurtle/target/LoadTurtle.jar;\r\n' +
+	'DEFINE R2PFORMAT r2ps.udf.pig.R2PFORMAT;\r\n' +
+	'DEFINE R2PTOBAG r2ps.udf.pig.R2PTOBAG;\r\n' +
+	'DEFINE R2PTOTUPLE r2ps.udf.pig.R2PTOTUPLE;\r\n' +
+	'DEFINE equalCondition r2ps.udf.pig.equalCondition;\r\n' +
+	'DEFINE execFunction r2ps.udf.pig.execFunction;\r\n' +
+	self.statements->iterate(s; acc : String = '' | acc + thisModule.decode(s.toString()) + '\r\n') + 
+	'result = distinct result;\r\n' + 
+	--'\r\nresult = foreach result generate $0,$1,CONCAT($2, \'.\');\r\n' + 
+	'\r\ndump result;'
+	--'store result into \'r2presult/$current_date\';'
 ;
 
 helper context Pig!Define def: toString(): String =
@@ -45,7 +41,7 @@ helper context Pig!Foreach def: toString(): String =
 	self.return + ' = foreach ' + self.relation + ' generate \r\n\t' + 
 	self.generate->first().toString() + 
 	self.generate->subSequence(2, n)->iterate(s; acc : String = '' | acc + ',\r\n\t' + s.toString()) +
-	';'
+	';\r\n'
 ;
 
 helper context Pig!Cross def: toString(): String =
@@ -65,6 +61,10 @@ helper context Pig!Union def: toString(): String =
 	self.return + ' = union ' + self.relation1.toString()  + ',' + self.relation2.toString() + ';\r\n'
 ;
 
+helper context Pig!Limit def: toString(): String =
+	self.return + ' = limit ' + self.relation.toString()  + ' ' + self.num.toString() + ';\r\n'
+;
+	
 helper context Pig!Expression def: toString(): String =
 	self.value
 ;
@@ -72,12 +72,20 @@ helper context Pig!Expression def: toString(): String =
 helper context Pig!Assignment def: toString(): String =
 	self.left + ' = ' + self.right.toString() + ';\r\n'
 ;
+	
+helper context Pig!Filter def: toString(): String =
+	self.return + ' = filter ' + self.relation + ' by ' + self.condition + ';\r\n'
+;
+	
+helper context Pig!Distinct def: toString(): String =
+	self.return + ' = distinct ' + self.relation + ';\r\n'
+;
 
 helper context Pig!AliasedEntity def: toString(): String =
-	if (self.alias.oclIsUndefined()) then
+	if self.alias.oclIsUndefined() then
 		self.exp
 	else
-		self.exp + ' as ' + self.alias
+		self.exp + if self.alias.size() > 0 then ' as ' + self.alias else '' endif
 	endif
 ;
 

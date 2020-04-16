@@ -1,210 +1,107 @@
+%default current_date `date +%Y-%m-%d-%H-%M-%S`
 REGISTER ./out/artifacts/LoadTurtle_jar/LoadTurtle.jar;
-DEFINE extract my.udf.extract;
-DEFINE FORMAT my.udf.FORMAT;
-DEFINE toBag my.udf.toBag;
-DEFINE toTuple my.udf.toTuple;
-DEFINE equalCondition my.udf.equalCondition;
-DEFINE execFunction my.udf.execFunction;
-%default Companies_source '{"iterator":"","referenceFormulation":"ql:CSV","query":"","sqlVersion":"","tableName":"","name":"src/test/resources/exampleFallback/Companies.csv"}'
+DEFINE R2PFORMAT r2ps.udf.pig.R2PFORMAT;
+DEFINE R2PTOBAT r2ps.udf.pig.toBag;
+DEFINE R2PTOTUPLE r2ps.udf.pig.toTuple;
+DEFINE equalCondition r2ps.udf.pig.equalCondition;
+DEFINE execFunction r2ps.udf.pig.execFunction;
+%default TriplesMap1_source '{"iterator":"","referenceFormulation":"ql:CSV","query":"","sqlVersion":"","tableName":"","name":"data.csv"}'
 
-%default Companies_referenceFormulation 'ql:CSV'
+%default TriplesMap1_referenceFormulation 'ql:CSV'
 
-%default Companies_iterator ''
+%default TriplesMap1_iterator ''
 
-%default Companies_template 'http://ex.com/comp/{id}'
+%default TriplesMap1_template 'http://example.com/{id}'
 
-Companies_data = load 'src/test/resources/exampleFallback/Companies.csv' using my.udf.LoadSource('${Companies_source}') as (data:chararray);
+TriplesMap1_data = load 'data.csv' using r2ps.udf.pig.R2PLOADSOURCE('${TriplesMap1_source}','[["id"],["name"]]') as (f1:tuple(chararray),f2:tuple(chararray));
 
-%default City_DBpedia_source '{"iterator":"/sparql:sparql/sparql:results/sparql:result","referenceFormulation":"ql:XPath","query":"SELECT+DISTINCT+%3FcountryName+%3Fcountry+WHERE+%7B%0D%0A%3Fcountry+a+dbo%3ACountry%3B+rdfs%3Alabel+%3FcountryName+.%0D%0AFILTER+%28+lang%28%3FcountryName%29+%3D+%2522en%2522+%29+%7D%0D%0AORDER+BY+DESC%28%3FcountryName%29%0D%0ALIMIT+7000","sqlVersion":"","tableName":"","name":"","sparql":{"endpoint":"http://dbpedia.org/sparql/","supportedLanguage":"sd:SPARQL11Query","resultFormat":"http://www.w3.org/ns/formats/SPARQL_Results_XML"}}'
-
-%default City_DBpedia_referenceFormulation 'ql:XPath'
-
-%default City_DBpedia_iterator '/sparql:sparql/sparql:results/sparql:result'
-
-%default City_DBpedia_template 'sparql:binding/sparql:uri'
-
-City_DBpedia_data = load 'UnusedPath' using my.udf.LoadSource('${City_DBpedia_source}') as (data:chararray);
-
-%default Country_Local_source '{"iterator":"","referenceFormulation":"ql:CSV","query":"","sqlVersion":"","tableName":"","name":"src/test/resources/exampleFallback/Companies.csv"}'
-
-%default Country_Local_referenceFormulation 'ql:CSV'
-
-%default Country_Local_iterator ''
-
-%default Country_Local_template 'http://ex.com/country/{country}'
-
-Country_Local_data = load 'src/test/resources/exampleFallback/Companies.csv' using my.udf.LoadSource('${Country_Local_source}') as (data:chararray);
-
-%default Country_DBpedia_source '{"iterator":"/sparql:sparql/sparql:results/sparql:result","referenceFormulation":"ql:XPath","query":"SELECT+DISTINCT+%3FcountryName+%3Fcountry+WHERE+%7B%0D%0A%3Fcountry+a+dbo%3ACountry%3B+rdfs%3Alabel+%3FcountryName+.%0D%0AFILTER+%28+lang%28%3FcountryName%29+%3D+%2522en%2522+%29+%7D%0D%0AORDER+BY+DESC%28%3FcountryName%29%0D%0ALIMIT+7000","sqlVersion":"","tableName":"","name":"","sparql":{"endpoint":"http://dbpedia.org/sparql/","supportedLanguage":"sd:SPARQL11Query","resultFormat":"http://www.w3.org/ns/formats/SPARQL_Results_XML"}}'
-
-%default Country_DBpedia_referenceFormulation 'ql:XPath'
-
-%default Country_DBpedia_iterator '/sparql:sparql/sparql:results/sparql:result'
-
-%default Country_DBpedia_template 'sparql:binding/sparql:uri'
-
-Country_DBpedia_data = load 'UnusedPath' using my.udf.LoadSource('${Country_DBpedia_source}') as (data:chararray);
-
-%default Country_Local_DBpedia_source '{"iterator":"","referenceFormulation":"ql:CSV","query":"","sqlVersion":"","tableName":"","name":"src/test/resources/exampleFallback/Companies.csv"}'
-
-%default Country_Local_DBpedia_referenceFormulation 'ql:CSV'
-
-%default Country_Local_DBpedia_iterator ''
-
-%default Country_Local_DBpedia_template 'http://dbpedia.org/resource/{country}'
-
-Country_Local_DBpedia_data = load 'src/test/resources/exampleFallback/Companies.csv' using my.udf.LoadSource('${Country_Local_DBpedia_source}') as (data:chararray);
-
-Companies_table = foreach Companies_data generate 
-	FLATTEN(extract(data,
-	'${Companies_referenceFormulation}',
-	'${Companies_iterator}',
-	toTuple('id'),
-	toTuple('country')));
-Companies_table = foreach Companies_table generate 
-	FORMAT('${Companies_template}', $0),
+TriplesMap1_table = foreach TriplesMap1_data generate 
+	R2PFORMAT('${TriplesMap1_template}', $0),
 	$0,
 	$1;
 
-City_DBpedia_table = foreach City_DBpedia_data generate 
-	FLATTEN(extract(data,
-	'${City_DBpedia_referenceFormulation}',
-	'${City_DBpedia_iterator}',
-	toTuple('/sparql:sparql/sparql:results/sparql:result/sparql:binding/sparql:uri')));
-City_DBpedia_table = foreach City_DBpedia_table generate 
-	FORMAT('${City_DBpedia_template}', $0),
-	$0;
+TriplesMap1_subjectMap = TriplesMap1_table;
 
-Country_Local_table = foreach Country_Local_data generate 
-	FLATTEN(extract(data,
-	'${Country_Local_referenceFormulation}',
-	'${Country_Local_iterator}',
-	toTuple('country')));
-Country_Local_table = foreach Country_Local_table generate 
-	FORMAT('${Country_Local_template}', $0),
-	$0;
+TriplesMap1_objectMap = TriplesMap1_table;
 
-Country_DBpedia_table = foreach Country_DBpedia_data generate 
-	FLATTEN(extract(data,
-	'${Country_DBpedia_referenceFormulation}',
-	'${Country_DBpedia_iterator}',
-	toTuple('/sparql:sparql/sparql:results/sparql:result/sparql:binding/sparql:uri')));
-Country_DBpedia_table = foreach Country_DBpedia_table generate 
-	FORMAT('${Country_DBpedia_template}', $0),
-	$0;
-
-Country_Local_DBpedia_table = foreach Country_Local_DBpedia_data generate 
-	FLATTEN(extract(data,
-	'${Country_Local_DBpedia_referenceFormulation}',
-	'${Country_Local_DBpedia_iterator}',
-	toTuple('country')));
-Country_Local_DBpedia_table = foreach Country_Local_DBpedia_table generate 
-	FORMAT('${Country_Local_DBpedia_template}', $0),
-	$0;
-
-Companies_subjectMap = Companies_table;
-
-Companies_subjectMap = foreach Companies_subjectMap generate 
+TriplesMap1_objectMap = foreach TriplesMap1_objectMap generate 
 	$0,
-	'rdf:type',
-	'ex:Company';
-RDFS = Companies_subjectMap;
+	'foaf:name',
+	'';
 
-City_DBpedia_subjectMap = City_DBpedia_table;
+result = TriplesMap1_objectMap;
 
-Country_Local_subjectMap = Country_Local_table;
+ns = limit result,1;
 
-Country_DBpedia_subjectMap = Country_DBpedia_table;
-
-Country_Local_DBpedia_subjectMap = Country_Local_DBpedia_table;
-
-Companies_refObjectMap = Companies_table;
-
-
-Companies_refObjectMap = foreach Companies_table generate 
-	$0,
-	'ex:country',
-	FORMAT('<http://dbpedia.org/resource/%s>',$2);
-RDFS = union RDFS,Companies_refObjectMap;
-
-Companies_refObjectMap = foreach Companies_table generate 
-	$0,
-	'ex:country',
-	FORMAT('<http://ex.com/country/%s>',$2);
-RDFS = union RDFS,Companies_refObjectMap;
-
-
-
-
-cgp = cross gpom1,gpom1;
-
-CompaniesrefObjectMap = foreach cgp generate 
-	FLATTEN(Fallback(COUNT(CompaniesrefObjectMap),$1,$3));
-ns = foreach RDFS generate 
+ns = foreach ns generate 
 	'@prefix',
 	'rr:',
 	'http://www.w3.org/ns/r2rml#.';
-RDFS = union RDFS,ns;
 
-ns = foreach RDFS generate 
+result = union result,ns;
+
+ns = foreach ns generate 
 	'@prefix',
-	'rml:',
-	'http://semweb.mmlab.be/ns/rml#.';
-RDFS = union RDFS,ns;
+	'foaf:',
+	'http://xmlns.com/foaf/0.1/.';
 
-ns = foreach RDFS generate 
-	'@prefix',
-	'crml:',
-	'http://semweb.mmlab.be/ns/crml#.';
-RDFS = union RDFS,ns;
+result = union result,ns;
 
-ns = foreach RDFS generate 
-	'@prefix',
-	'ql:',
-	'http://semweb.mmlab.be/ns/ql#.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
-	'@prefix',
-	'rdfs:',
-	'http://www.w3.org/2000/01/rdf-schema#.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
-	'@prefix',
-	'xsd:',
-	'http://www.w3.org/2001/XMLSchema#.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
-	'@prefix',
-	'dcat:',
-	'http://www.w3.org/ns/dcat#.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
-	'@prefix',
-	'sd:',
-	'http://www.w3.org/ns/sparql-service-description#.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
-	'@prefix',
-	'dcterms:',
-	'http://purl.org/dc/terms/.';
-RDFS = union RDFS,ns;
-
-ns = foreach RDFS generate 
+ns = foreach ns generate 
 	'@prefix',
 	'ex:',
 	'http://example.com/.';
-RDFS = union RDFS,ns;
 
-ns = foreach RDFS generate 
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'xsd:',
+	'http://www.w3.org/2001/XMLSchema#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'rml:',
+	'http://semweb.mmlab.be/ns/rml#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'ql:',
+	'http://semweb.mmlab.be/ns/ql#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'fnml:',
+	'http://semweb.mmlab.be/ns/fnml#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'fno:',
+	'https://w3id.org/function/ontology#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
+	'@prefix',
+	'grel:',
+	'http://users.ugent.be/~bjdmeest/function/grel.ttl#.';
+
+result = union result,ns;
+
+ns = foreach ns generate 
 	'@base',
 	'',
-	'http://example.com/base.';
-RDFS = union RDFS,ns;
+	'http://example.com/base/.';
 
-RDFS = distinct RDFS;
-dump RDFS;
+result = union result,ns;
+
+result = distinct result;
+store result into 'r2presult/$current_date';

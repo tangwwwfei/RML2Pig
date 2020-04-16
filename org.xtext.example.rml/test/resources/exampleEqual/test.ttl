@@ -1,3 +1,0 @@
-
-<http://NULL> a <http://vocab.org/transit/terms/Stop> ;
-	<http://purl.org/dc/terms/identifier> "6523" , "6524" .

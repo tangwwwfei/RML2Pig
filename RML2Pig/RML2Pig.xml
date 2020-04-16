@@ -1,34 +1,44 @@
 <project name="RML2Pig" default="transformAll" basedir=".">
 
+	<property name="inputPath" value="E:/RML2PigAndScala/test/resources/passed/test-cases/" />
+	
 	<property name="metamodelPath" value="./metamodels/" />
-	<property name="samplePath" value="./samples/" />
 	<property name="transformationPath" value="./transformations/" />	
 	
-	<property name="sourceName" value="example_rml" />
-	<property name="targetName" value="${sourceName}-pig" />
+	<property name="sourceName" value="input_rml" />
+	<property name="targetName" value="output-pig" />
 	<property name="transformationName" value="RML2Pig" />	
 	
-	
-	<target name="transformAll">
+	<target name="transform_rml2pig">
+		<echo message="${dir.name}" />
 		<!-- Loading metamodels -->
 		<atl.loadModel modelHandler="EMF" name="RML" metamodel="MOF" path="${metamodelPath}RML.ecore" />
 		<atl.loadModel modelHandler="EMF" name="Pig" metamodel="MOF" path="${metamodelPath}Pig.ecore" />
 		
-		<atl.loadModel modelHandler="EMF" name="{$sourceName}" metamodel="RML" path="${samplePath}${sourceName}.xmi" />
-		
+		<atl.loadModel modelHandler="EMF" name="${dir.name}.sourceName" metamodel="RML" path="${dir.name}" />
+		<echo message="launch transform" />
 		<atl.launch path="${transformationPath}${transformationName}.atl">
-		    <inmodel name="IN" model="{$sourceName}"/>
-			<outModel name="OUT" model="${targetName}" metamodel="Pig" />
+		    <inmodel name="IN" model="${dir.name}.sourceName"/>
+			<outModel name="OUT" model="${dir.name}.targetName" metamodel="Pig" />
 		</atl.launch>
 		
-		<atl.saveModel model="${targetName}" path="${samplePath}${targetName}.xmi" />
-		  
+		<atl.saveModel model="${dir.name}.targetName" path="./samples/intermediate.r2p" />
+		<echo message="Save Pig model to text" />
 		<!-- model to text -->
-		<atl.loadModel name="${targetName}" metamodel="Pig" path="${samplePath}${targetName}.xmi" />
+		<atl.loadModel name="${dir.name}.targetName" metamodel="${dir.name}.Pig" path="./samples/intermediate.r2p" />
 		
 		<atl.launch  path="${transformationPath}Pig2Text.atl">
-			<inmodel name="IN" model="${targetName}"/>			
-		</atl.launch>		
-	
+			<inmodel name="IN" model="${dir.name}.targetName"/>
+		</atl.launch>
 	</target>
+	
+	<target name="transformAll">
+		<taskdef resource="net/sf/antcontrib/antlib.xml"/>  			
+        <foreach target="transform_rml2pig" param="dir.name" inheritall="true">
+            <path>
+                <fileset dir="${inputPath}" includes="**/*.xmi" ></fileset>
+            </path>
+        </foreach>
+	</target>
+	
 </project>
