@@ -1,0 +1,1672 @@
+-- @path Pig=/RML2Scala/metamodels/Scala.ecore
+-- @path RML=/RML2Scala/metamodels/RML.ecore
+module RML2Scala;
+create OUT : Scala from IN : RML;
+
+helper def : firstTime : Boolean = true;
+helper def : mapOfTable : Map(String, Sequence(String)) = Map{};
+helper def : mapOfFormul : Map(String, String) = Map{};
+helper def : mapOfTriplesMap : Map(String, RML!TriplesMap) = Map{};--TriplesName - TriplesMap
+helper def : mapOfPrefix : Map(String, String) = Map{}; --prefix iri
+
+entrypoint rule RML2Scala() {
+	using{
+		mapping : RML!Mapping = RML!Mapping.allInstances()->first();
+	}
+	do{
+		thisModule.VisitMapping(mapping);
+		thisModule.generateMapping(mapping);
+	}
+}
+
+rule generateMapping(mapping : RML!Mapping){
+	using {
+		--m : RML!Mapping = mapping;
+	}
+	to
+		s : Scala!Seq(
+			isDefine <- true,
+			tuples <- mapping.directives->collect(e | thisModule.Namespace2Foreach(e)),
+			return <- 'prefixes'
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(s.return+'.toDS()'),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- s,
+			statements <- u
+		),
+		program : Scala!Program(
+			absolutePath <- mapping.AbsolutePath,
+			blocks <- mapping.triplesMaps->collect(t | thisModule.GenerateLogicalSource(t)),
+			blocks <- table,
+			blocks <- mapping.triplesMaps->collect(t | thisModule.GenerateSubjectMap(t)),
+			blocks <- mapping.triplesMaps->collect(t | thisModule.GenerateAllTermMaps(t)),
+			blocks <- block
+		),
+		table : Scala!Block(
+			statements <- thisModule.mapOfTable->getKeys()->collect(e | thisModule.GenerateTable(e))
+		)
+	do{
+		thisModule.debug('Tranformations completed!');
+	}
+}
+
+--To find all template value and reference value
+rule VisitMapping(mapping : RML!Mapping) {
+	do{
+		thisModule.mapOfPrefix <- thisModule.mapOfPrefix->including('base', '');
+		for (d in mapping.directives) {
+			if (not d.prefix.oclIsUndefined()) {
+				thisModule.mapOfPrefix <- thisModule.mapOfPrefix->including(d.prefix, d.iri);
+			}
+			else{
+				thisModule.mapOfPrefix <- thisModule.mapOfPrefix->including('base', d.base.substring(2, d.base.size()-1));
+			}
+		}
+		--thisModule.debug(thisModule.mapOfPrefix);
+		for (t in mapping.triplesMaps) {
+			--t.name <- t.name.replaceAll(':', '_');
+			thisModule.mapOfTriplesMap <- thisModule.mapOfTriplesMap->including(t.name, t);
+			thisModule.VisitLogicalSource(t.name, t.logicalSource);
+		}
+		for (t in mapping.triplesMaps) {
+			--add all subjectMap
+			thisModule.VisitTermMap(t.name, t.subjectMap.first());
+			--thisModule.debug('--------------Init---------');
+		}
+		for (t in mapping.triplesMaps) {
+			thisModule.VisitTriplesMap(t);
+		}
+		thisModule.debug('VisitTriplesMap:' + thisModule.mapOfPrefix);
+		thisModule.debug('-----------------Visit Completed!-----------------');
+	}
+}
+
+rule VisitTriplesMap(triplesMap : RML!TriplesMap) {
+	do{
+		
+		if (triplesMap.subjectMap.size() > 1) {
+			thisModule.hasError <- true;
+			thisModule.debug('Find error: triplesMap with two subjectMap');
+		}
+		else{
+			thisModule.VisitSubjectMap(triplesMap.name, triplesMap.subjectMap.first());
+			thisModule.VisitPredicateObjectMaps(triplesMap.name, triplesMap.predicateObjectMaps);
+		}
+	}
+}
+
+rule VisitLogicalSource(triplesName : String, ls : RML!LogicalSource) {
+	using {
+		positions : OrderedSet(String) = OrderedSet{};
+		formula : String = '';
+	}
+	do{
+		if (not ls.oclIsUndefined()) {
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+			if (not ls.referenceFormulation.oclIsUndefined()) {
+				formula <- ls.referenceFormulation;
+			}
+			thisModule.mapOfFormul <- thisModule.mapOfFormul->including(triplesName, formula);
+		}
+	}
+}
+
+rule VisitSubjectMap(triplesName : String, sm : RML!SubjectMap) {
+	do{
+		if (not sm.oclIsUndefined()) {
+			if (not sm.template.oclIsUndefined()) {
+				if (not sm.template.value.startsWith('<')) {
+					thisModule.debug('sm-template-value:' + sm.template.value + ';');
+					--sm.template.value <- '<' + sm.template.value + '>';
+				}
+			}
+			thisModule.VisitTermMap(triplesName, sm);
+			thisModule.VisitGraphMaps(triplesName, sm.graphMaps);
+			thisModule.VisitFunctionMaps(triplesName, sm.functionMaps);	
+			thisModule.VisitBooleanConditions(triplesName, sm.equalConditions);
+		}
+		else{
+			thisModule.hasError <- true;	-- subject map missing
+			thisModule.debug('Find error: subject map missing.');
+		}
+	}
+}
+
+rule VisitPredicateObjectMaps(triplesName : String, poms : Sequence(RML!PredicateObjectMap)) {
+	do{
+		if (not poms.oclIsUndefined()) {
+			for (pom in poms) {
+				thisModule.VisitPredicateMaps(triplesName, pom.predicateMaps);
+				thisModule.VisitObjectMaps(triplesName, pom.objectMaps);
+				thisModule.VisitGraphMaps(triplesName, pom.graphMaps);
+				thisModule.VisitFunctionMaps(triplesName, pom.functionMaps);
+				thisModule.VisitBooleanConditions(triplesName, pom.equalConditions);
+				thisModule.VisitBindingConditions(triplesName, pom.bindingConditions);
+				thisModule.VisitPredicateObjectMaps(triplesName, pom.fallbackMaps);
+			}
+		}
+	}
+}
+
+rule VisitPredicateMaps(triplesName : String, pms : Sequence(RML!PredicateMap)) {
+	do{
+		if (not pms.oclIsUndefined()) {
+			for (pm in pms) {
+				thisModule.VisitTermMap(triplesName, pm);
+				thisModule.VisitGraphMaps(triplesName, pm.graphMaps);
+				thisModule.VisitBooleanConditions(triplesName, pm.equalConditions);
+				thisModule.VisitBindingConditions(triplesName, pm.bindingConditions);
+			}
+		}
+	}
+}
+
+rule IsSameSource(t1 : RML!TriplesMap, t2 : RML!TriplesMap) {
+	using{
+		same : Boolean = true;
+		ls1 : RML!LogicalSource = t1.logicalSource;
+		ls2 : RML!LogicalSource = t2.logicalSource;
+	}
+	do{
+		if (ls1.referenceFormulation <> ls2.referenceFormulation) {
+			same <- false;	
+		}
+		else if (ls1.source.path <> ls2.source.path) {
+			same <- false;	
+		}
+		if (not ls1.source.sparql.oclIsUndefined()) {
+			same <- false;
+		}
+		--thisModule.debug('$$$$$$$$t1:'+t1.name + ' t2:' + t2.name + ' ' + same);
+		same;
+	}
+}
+
+rule VisitObjectMaps(triplesName : String, oms : Sequence(RML!ObjectMap)) {
+	using{
+		parentTriplesMap : RML!TriplesMap = RML!TriplesMap;
+		triplesMap : RML!TriplesMap = RML!TriplesMap;
+		positions : OrderedSet(String) = OrderedSet{};
+		val : String = '';
+	}
+	do{
+		if (not oms.oclIsUndefined()) {
+			for (om in oms) {
+				thisModule.VisitTermMap(triplesName, om);
+				thisModule.VisitGraphMaps(triplesName, om.graphMaps);
+				if (not om.parentTriplesMap.oclIsUndefined()) {
+					--with parentTriplesMap
+					if (om.joinConditions.oclIsUndefined() or om.joinConditions.isEmpty()) {
+						triplesMap <- thisModule.mapOfTriplesMap.get(triplesName);
+						--thisModule.debug(om.parentTriplesMap);
+						parentTriplesMap <- thisModule.mapOfTriplesMap.get(om.parentTriplesMap);
+						--if they have same logicalSource
+						--then need to add parentTriplesMap's subjectMap to this triplesMap
+						if (thisModule.IsSameSource(triplesMap, parentTriplesMap)) {
+							val <- thisModule.getTermMapValue(parentTriplesMap.subjectMap.first(), '');
+							val <- thisModule.extractValueFromTemplate(val,parentTriplesMap.logicalSource.iterator);
+							--need to add parentTriplesMap's iterator
+							--same name but diff iterator
+							positions <- thisModule.mapOfTable->get(triplesName);
+							if (positions.indexOf(val) < 1) {
+								--thisModule.debug('add ['+parentTriplesMap.logicalSource.iterator+']'+val+' to ' + triplesName);
+								positions <- positions->append(val);
+								thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+							}
+						}
+						else{
+							--thisModule.debug('not same');	
+						}
+					}
+					else{
+						thisModule.VisitJoinConditions(triplesName, om.parentTriplesMap, om.joinConditions);
+					}
+				}
+				thisModule.VisitFunctionMaps(triplesName, om.functionMaps);
+				thisModule.VisitBooleanConditions(triplesName, om.equalConditions);
+				thisModule.VisitBindingConditions(triplesName, om.bindingConditions);
+				thisModule.VisitObjectMaps(triplesName, om.fallbackMaps);
+			}
+		}	
+	}
+}
+
+rule VisitTermMap(triplesName : String, tm : RML!TermMap) {
+	using {
+		positions : OrderedSet(String) = thisModule.mapOfTable->get(triplesName);
+		triplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap->get(triplesName);
+		templateValue : String = '';
+		referenceValue : String = '';
+		lmReferenceValue : String = '';
+	}
+	do{
+		if (not tm.oclIsUndefined()) {
+			if (not tm.template.oclIsUndefined()) {
+				--Fullpath is not needed.
+				templateValue <- thisModule.extractValueFromTemplate(tm.template.value, triplesMap.logicalSource.iterator);
+				if (positions.indexOf(templateValue) < 1) {
+					thisModule.debug('iterator:'+thisModule.removeQuotes(triplesMap.logicalSource.iterator));
+					thisModule.debug('add ['+tm.template.value+'] tem ['+templateValue+'] to [' + triplesName + ']');
+					positions <- positions->append(templateValue);
+				}
+			}
+			else if (not tm.reference.oclIsUndefined()) {
+				referenceValue <- thisModule.extractValueFromTemplate(tm.reference.value, triplesMap.logicalSource.iterator);
+				if (positions.indexOf(referenceValue) < 1) {
+					thisModule.debug('add ['+tm.reference.value+'] ref ['+referenceValue+'] to [' + triplesName + ']');
+					positions <- positions->append(referenceValue);
+				}
+			}
+			if (not tm.languageMap.oclIsUndefined()) {
+				if (not tm.languageMap.reference.oclIsUndefined()) {
+					lmReferenceValue <- thisModule.extractValueFromTemplate(tm.languageMap.reference.value, triplesMap.logicalSource.iterator);
+					if (positions.indexOf(lmReferenceValue) < 1) {
+						--thisModule.debug('add ref ['+referenceValue+'] to [' + triplesName + ']');
+						positions <- positions->append(lmReferenceValue);
+					}
+				}
+			}
+			
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+		}
+	}
+}
+
+rule VisitJoinConditions(triplesName : String, parentName : String, jcs : Sequence(RML!JoinCondition)) {
+	using {
+		positions : OrderedSet(String) = thisModule.mapOfTable->get(triplesName);
+		parentPositions : OrderedSet(String) = thisModule.mapOfTable->get(parentName);
+		triplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap->get(triplesName);
+		parentTriplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap->get(parentName);
+		child : String = '';
+		parent : String = '';
+	}
+	do{
+		if (not jcs.oclIsUndefined()) {
+			for (jc in jcs) {
+				--thisModule.VisitFunctionMaps(jc.functionMaps);
+				if (positions.indexOf(jc.child) < 1) {
+					--thisModule.debug('add child ['+jc.child+'] to [' + triplesMap.name + ']');
+					child <- thisModule.extractValueFromTemplate(jc.child, triplesMap.logicalSource.iterator);
+					positions <- positions->append(child);
+				}
+				if (parentPositions.indexOf(jc.parent) < 1) {
+					--thisModule.debug('add parent ['+jc.parent+'] to [' + parentTriplesMap.name + ']');
+					parent <- thisModule.extractValueFromTemplate(jc.parent, parentTriplesMap.logicalSource.iterator);
+					parentPositions <- parentPositions->append(parent);
+				}
+			}
+			
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(parentName, parentPositions);
+		}
+	}
+}
+
+rule VisitGraphMaps(triplesName : String, gms : Sequence(RML!GraphMap)) {
+	do{
+		for (gm in gms) {
+			--non-IRI named graph, which is an error
+			if (not gm.reference.oclIsUndefined()) {
+				thisModule.hasError <- true;
+				thisModule.debug('Find error: non-IRI named graph.');
+			}
+			thisModule.VisitTermMap(triplesName, gm);
+			thisModule.VisitFunctionMaps(triplesName, gm.functionMaps);
+		}
+	}
+}
+
+rule VisitFunctionMaps(triplesName : String, fms : Sequence(RML!FunctionMap)) {
+	do{
+		if (not fms.oclIsUndefined()) {
+			for (fm in fms) {
+				if (fm.logicalSource.oclIsUndefined()) {
+					thisModule.VisitPredicateObjectMaps(triplesName, fm.predicateObjectMaps);
+				}
+			}
+		}
+	}
+}
+
+rule VisitBindingConditions(triplesName : String, bcs : Sequence(RML!BindingCondition)) {
+	using{
+		positions : OrderedSet(String) = thisModule.mapOfTable->get(triplesName);	
+	}
+	do{
+		if (not bcs.oclIsUndefined()) {
+			for (bc in bcs) {
+				--thisModule.debug('boolean condition');
+				--thisModule.debug('push:' + bc.reference.value);
+				if (positions.indexOf(bc.reference.value) < 1) {
+					positions <- positions->append(bc.reference.value);
+				}
+				thisModule.VisitFunctionMaps(triplesName, bc.functionMaps);
+			}
+			
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+		}
+	}
+}
+
+rule VisitBooleanConditions(triplesName : String, blcs : Sequence(RML!BooleanCondition)) {
+	do{
+		if (not blcs.oclIsUndefined()) {
+			for (blc in blcs) {
+				--thisModule.debug('boolean condition');
+				thisModule.VisitBindingConditions(triplesName, blc.binding);
+				thisModule.VisitFunctionMaps(triplesName, blc.functionMaps);
+			}
+		}
+	}
+}
+
+rule GenerateAllTermMaps(t : RML!TriplesMap) {
+	to
+		block : Scala!Block(
+			statements <- t.predicateObjectMaps->collect(
+				pom | thisModule.GeneratePredicateObjectMap(t, pom, t.subjectMap.first().graphMaps))
+		)
+	do{
+		--thisModule.debug('predicateObjectMaps size:' + t.predicateObjectMaps->size());
+		block;
+	}
+}
+
+rule param2AliasedEntity(triplesName : String, mapPos : Sequence(OclAny), withFormat : Boolean) {
+	using{
+		clearName : String = thisModule.getClearName(triplesName);
+		result : Sequence(Scala!AliasedEntity) = Sequence{};
+		i : Integer = 0;
+	}
+	do{
+		if (withFormat){
+			result <- result->including(thisModule.CreateEntityLazy('R2PFORMAT('+clearName+'_template, r.getString(0))'));
+		}
+		for	(ae in mapPos) {
+			result <- result->including(thisModule.CreateEntityLazy('r.getString('+i+')'));
+			i <- i + 1;
+		}
+		result;
+	}
+}
+
+rule param2String(start : Integer, mapPos : Sequence(OclAny), comma : String) {
+	using{
+		result : String = '';
+		i : Integer = start;
+	}
+	do{
+		for	(ae in mapPos) {
+			result <- result + 'r._' + (i+1) + comma;
+			i <- i + 1;
+		}
+		if (result.size() > 0) {
+			result <- result.substring(1, result.size()-1);
+		}
+		result;
+	}
+}
+
+rule GenerateTable(tripleName : String) {
+	using{
+		mapPos : Sequence(String) = thisModule.mapOfTable->get(tripleName);
+		clearName : String = thisModule.getClearName(tripleName);
+		formul : String = thisModule.mapOfFormul->get(tripleName);
+	}
+	to
+		f1 : Scala!Assignment(
+			isDefine <- true,
+			right <- 'createDF(' + clearName + '_data)',
+			left <- clearName + '_df'
+		),
+		f2 : Scala!Foreach(
+			isDefine <- true,
+			relation <- f1.left,
+			generate <- thisModule.param2AliasedEntity(tripleName,mapPos,true),
+			return <- clearName + '_table'
+		),
+		block : Scala!Block(
+			statements <- f1,
+			statements <- f2
+		)
+	do{
+		--thisModule.debug('formul:' + formul);
+		block;	
+	}
+}
+
+rule getSPARQL(sparql : RML!Service) {
+	using {
+		json : String = '';
+	}
+	do{
+		json <- '
+		{
+			"endpoint" : "'+sparql.endpoing+'",
+			"supportedLanguage" : "'+sparql.supportedLanguage+'",
+			"resultFormat" : "'+sparql.resultFormat+'"
+		}';
+		json;
+	}
+}
+
+rule getDataRetrieval(dr : RML!DataRetrieval) {
+	using {
+		json : String = '';
+		name : String = if dr.path.oclIsUndefined() then '""' else dr.path endif;
+		sparql : String = '';
+		dataset : String = '';
+		webapi : String = '';
+		pagedCollection : String = '';
+		database : String = '';
+		csvweb : String = '';
+		function : String = '';
+		parameter : String = '';
+		distribution : String = '';
+	
+		strHydraMapping : String = '';
+		strProvidedBy : String = '';
+	}
+	do{
+		--"sparql":"","dataset":"","webapi":"","pagedCollection":"","database":"","csvweb":"","fcuntion":"","":""
+		if (not dr.sparql.oclIsUndefined()) {
+			sparql <- ',"sparql":{"endpoint":"'+thisModule.removeBracketsAndQuotes(dr.sparql.endpoint)+'","supportedLanguage":"'+thisModule.removeBracketsAndQuotes(dr.sparql.supportedLanguage)+'","resultFormat":"'+thisModule.removeBracketsAndQuotes(dr.sparql.resultFormat)+'"}';
+		}
+		if (not dr.dataset.oclIsUndefined()) {
+			dataset <- ',"dataset":{"distribution":'+dr.dataset.distribution+'}';
+		}
+		if (not dr.webAPI.oclIsUndefined()) {
+			for	(hm in dr.webAPI.hydraMapping) {
+				strHydraMapping <- strHydraMapping + '{"variable":'+hm.variable+',"required",'+hm.required+'},';
+			}
+			strHydraMapping <- strHydraMapping->substring(0, strHydraMapping->size()-1);
+			webapi <- ',"webapi":{"template":'+dr.webAPI.template+',"hydraMapping":['+strHydraMapping+']}';
+		}
+		if (not dr.pagedCollection.oclIsUndefined()) {
+			pagedCollection <- ',"pagedCollection":{"itemsPerPage":'+dr.pagedCollection.itemsPerPage+',"firstPage":'+dr.pagedCollection.firstPage+',"nextPage":'+dr.pagedCollection.nextPage+'}';
+		}
+		if (not dr.database.oclIsUndefined()) {
+			database <- ',"database":{"jdbcDSN":'+dr.database.jdbcDSN+',"jdbcDriver":'+dr.database.jdbcDriver+',"username":'+dr.database.username+',"password":'+dr.database.password+'}';
+		}
+		if (not dr.csvonWeb.oclIsUndefined()) {
+			csvweb <- ',"csvweb":{"url":'+dr.csvonWeb.url+',"dialect": {"delimiter":'+dr.csvonWeb.dialect.delimiter+',"encoding":'+dr.csvonWeb.dialect.encoding+',"header":'+dr.csvonWeb.dialect.header+',"headerRowCount":'+dr.csvonWeb.dialect.headerRowCount+',"trim":'+dr.csvonWeb.dialect.trim+'}}';
+		}
+		if (not dr.distribution.oclIsUndefined()) {
+			distribution <- ',"distribution":{"downloadURL":'+dr.distribution.downloadURL+'}';
+		}
+		json <- ',"name":'+name+sparql+dataset+webapi+pagedCollection+database+csvweb+function+parameter+distribution;
+		json;
+	}
+}
+
+rule getLogicalSource(ls : RML!LogicalSource) {
+	using {
+		json : String = '';
+		iterator : String = if not ls.iterator->oclIsUndefined() then ls.iterator else '""' endif;
+		formulation : String = if not ls.referenceFormulation->oclIsUndefined() then ls.referenceFormulation else '' endif;
+		_query : String = if not ls.query->oclIsUndefined() then ls.query else '""' endif;
+		version : String = if not ls.sqlVersion->oclIsUndefined() then ls.sqlVersion else '' endif;
+		tableName : String = if not ls.tableName->oclIsUndefined() then ls.tableName else '""' endif;
+	}
+	do{
+		json <- '"iterator":'+iterator+',"referenceFormulation":"'+formulation+'","query":'+_query+',"sqlVersion":"'+version+'","tableName":'+tableName+'';
+		json;
+	}
+}
+
+rule GenerateLogicalSource(triple : RML!TriplesMap) {
+	using {
+		tripleName : String = triple.name;
+		clearName : String = thisModule.getClearName(tripleName);
+		ls : RML!LogicalSource = triple.logicalSource; 
+		subject : RML!SubjectMap = triple.subjectMap.first();
+		source : String = if not ls.source->oclIsUndefined() then thisModule.getDataRetrieval(ls.source) else '' endif;
+		parameters : String = thisModule.getLogicalSource(ls);
+		iterator : String = if not ls.iterator->oclIsUndefined() then thisModule.removeQuotes(ls.iterator) else '' endif;
+		file : String = if not ls.source.path.oclIsUndefined() then ls.source.path else 'UnusedPath' endif;
+	}	
+	to
+		ds : Scala!Default(
+			isDefine <- true,
+			name <- clearName + '_source',
+			value <- '{'+parameters+source+'}'
+		),
+		df : Scala!Default(
+			isDefine <- true,
+			name <- clearName + '_referenceFormulation',
+			value <- if ls.referenceFormulation.oclIsUndefined() then '' else ls.referenceFormulation endif
+		),
+		di : Scala!Default(
+			isDefine <- true,
+			name <- clearName + '_iterator',
+			value <- iterator
+		),
+		dt : Scala!Default(
+			isDefine <- true,
+			name <- clearName + '_template',
+			value <- thisModule.getTermMapValue(subject, 'rr:IRI')
+		),
+		l : Scala!Load(
+			isDefine <- true,
+			path <- thisModule.CreateExpressionLazy(thisModule.removeQuotes(file)),
+			"using" <- 'R2PLOADSOURCE('+ds.name+',"""'+thisModule.convertMap2Parameters(tripleName) + '""")',
+			return <- clearName + '_data'
+		),
+		block : Scala!Block(
+			statements <- ds,
+			statements <- df,
+			statements <- di,
+			statements <- dt,
+			statements <- l
+		)
+	do{
+		block;
+	}
+}
+
+helper def : getTripleName(triple : RML!TriplesMap) : String =
+	triple.name.regexReplaceAll('%3e|%3c','');
+helper def : getClearName(s : String) : String =
+	s.regexReplaceAll('^<#?(.*)>$','$1').replaceAll(':','_');
+
+rule ParseBooleanCondition2Tuple(triplesName : String, c : RML!BooleanCondition) {
+	using{
+		result : String =  'equalCondition(R2PTOBAG(';
+		mapPos : Sequence(String) = thisModule.mapOfTable->get(triplesName);
+		pos : Integer = -1;
+		condition : String = '';
+	}
+	do{
+		condition <- c.binding;
+		for (bind in c.binding) {
+			pos <- mapPos->indexOf(bind.reference.value);
+			result <- result + 'R2PTOTUPLE(r._' + (pos+1) + ',' + bind.variable + '),';	
+		}
+		result <- result.substring(1, result.size()) + '),';
+		result <- result +'"'+c.condition + '"';
+		result;
+	}
+}
+
+rule GenerateBooleanCondition(triplesName : String, nodeName : String, c : RML!BooleanCondition, opp : Boolean) {
+	using{
+		con : String = thisModule.ParseBooleanCondition2Tuple(triplesName, c);
+	}
+	to
+		a : Scala!Assignment(
+			right <- triplesName + '_table',
+			left <- nodeName
+		),
+		f1 : Scala!Filter(
+			relation <- a.left,
+			condition <- if opp then 'not ' + con else con endif,
+			return <- a.left
+		),
+		block : Scala!Block(
+			statements <- a,
+			statements <- f1
+		)
+	do{
+		block.statements;
+	}
+}
+
+--sd:aaa -> http://semweb.mmlab.be/ns/crml#aaa
+rule QName2Fullname(val : String) {
+	using{
+		prefix : String = '';
+		suffix : String = '';
+		seq : Sequence(String) = Sequence{};
+		result : String = '';
+	}
+	do{
+		seq <- val.split(':');
+		prefix <- seq.first() + ':';
+		suffix <- seq.last();
+		result <- thisModule.mapOfPrefix.get(prefix) + suffix;
+		result;
+	}
+}
+
+rule ParseFunctionMap2String(triplesName : String, functionMap : RML!FunctionTermMap) {
+	using{
+		--execFunction(
+			--TOTUPLE('fno:executes','http://users.ugent.be/~bjdmeest/function/grel.ttl#toUppercase'),
+			--TOTUPLE('http://users.ugent.be/~bjdmeest/function/grel.ttl#valueParameter',r._2));	
+		hasLS : Boolean = not functionMap.logicalSource.oclIsUndefined();
+		desc : String = '';
+		val : String = '';
+		result : String = 'execFunction(';
+		om : RML!ObjectMap = RML!ObjectMap;
+		pm : RML!PredicateMap = RML!PredicateMap;
+		mapPos : Sequence(String) = Sequence{};
+		n : Integer = 1;
+	}
+	do{
+		if (hasLS) {
+			mapPos <- thisModule.mapOfTable.get(functionMap.functionTriplesMap);
+		}
+		else{
+			mapPos <- thisModule.mapOfTable.get(triplesName);
+		}
+		for	(pom in functionMap.predicateObjectMaps) {
+			pm <- pom.predicateMaps.first();
+			desc <- thisModule.getTermMapValue(pm, '');
+			om <- pom.objectMaps.first();
+			val <- thisModule.getTermMapValue(om, '');
+			if (not om.reference.oclIsUndefined() or not om.template.oclIsUndefined()) {
+				val <- 'r._' + (mapPos.indexOf(val)+1);
+			}
+			else{
+				val <- thisModule.QName2Fullname(val);
+			}
+			result <- result + 'R2PTOTUPLE("'+desc+'","'+val+'"),';
+		}
+		n <- result.size() - 1;
+		--thisModule.debug(n);
+		result <- result.substring(1, n) + ')';
+		--thisModule.debug('############' + result);
+		result;
+	}
+}
+
+rule GenerateFunctionMap(triplesName : String, functionMap : RML!FunctionTermMap, par_relation : String, par_return : String) {
+	using{
+		--For subjectMap only one FunctionMap
+		--if FunctionTermMap has no LogicalSource , then property functionTriplesMap is nonsense.
+	}
+	to
+		f : Scala!Foreach(
+			relation <- par_relation,
+			generate <- thisModule.CreateEntityLazy(thisModule.ParseFunctionMap2String(triplesName, functionMap)),
+			return <- par_return
+		)
+	do{
+		f;
+	}
+}
+
+rule GenerateSubjectMap(triple : RML!TriplesMap) {
+	using{
+		sm : RML!SubjectMap = triple.subjectMap.first();
+		triplesName : String = triple.name;
+		clearName : String = thisModule.getClearName(triplesName);
+		iterator : String = triple.logicalSource.iterator;
+		subject_template : String = thisModule.getTermMapValue(sm, '');
+		mapPos : Sequence(String) = thisModule.mapOfTable->get(triplesName);
+		templateName : String = thisModule.getTemplateName(triplesName);
+		pn : Integer = mapPos->indexOf(subject_template);
+		ret : String = clearName + '_table';
+	}
+	to
+		block : Scala!Block(
+			statements <- sm.equalConditions->collect(c | thisModule.GenerateBooleanCondition(triplesName,ret,c,false)),
+			statements <- sm.functionMaps->collect(f | thisModule.GenerateFunctionMap(triplesName, f, ret, ret)),
+			statements <- sm.class->collect(e| thisModule.Class2Foreach(e,triple,pn,ret).statements)
+		)
+	do{
+		--thisModule.firstTime <- false;
+		thisModule.debug('GenerateSubjectMap: firstTime');
+		block;
+	}	
+}
+
+rule GeneratePOMFallbackMap(triple : RML!TriplesMap, fallbackMap : RML!PredicateObjectMap, own : String, gms : Sequence(RML!GraphMap))
+{
+	using{
+		triplesName : String = triple.name;
+		clearName : String = thisModule.getClearName(triplesName);
+	}
+	to
+		a2 : Scala!Assignment(
+			right <- clearName + '_table',
+			left <- clearName + '_predicateObjectMap2'
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy(own),
+			relation2 <- thisModule.CreateExpressionLazy(a2.left),
+			return <- own
+		),
+		block : Scala!Block(
+			statements <- a2,
+			statements <- fallbackMap.equalConditions->collect(e| thisModule.GenerateBooleanCondition(triplesName,a2.left,e,true)),
+			statements <- fallbackMap.fallbackMaps->collect(fpom | thisModule.GeneratePredicateObjectMap(triple, fpom, gms)),
+			statements <- u
+		)
+	do{
+		thisModule.debug('GeneratePOMFallbackMap');
+		block.statements;	
+	}
+}
+
+rule GeneratePredicateObjectMap(triple : RML!TriplesMap, pom : RML!PredicateObjectMap, gms : Sequence(RML!GraphMap))
+{
+	using{
+		triplesName : String = triple.name;
+		clearName : String = thisModule.getClearName(triplesName);
+		hasConditions : Boolean = not pom.equalConditions.oclIsUndefined();
+		hasFallbackMap : Boolean = not pom.fallbackMaps.oclIsUndefined();
+		graphs : Sequence(RML!GraphMap) = thisModule.getGraphMaps(triple.subjectMap.first(), pom);
+		nodeName : String = clearName + '_predicateObjectMap';
+	}
+	to
+		block : Scala!Block(
+			statements <- pom.equalConditions->collect(e| thisModule.GenerateBooleanCondition(triplesName,nodeName,e,false)),
+			statements <- pom.predicateMaps->collect(pm | pom.objectMaps->collect(om | thisModule.GenerateObjectMap(triple, pm, om, graphs))),
+			statements <- pom.fallbackMaps->collect(b | thisModule.GeneratePOMFallbackMap(triple, b, nodeName))
+		)
+	do{
+		block.statements;
+	}
+}
+
+rule GeneratePredicateMap(triple : RML!TriplesMap, pm : RML!PredicateMap){
+	to
+		block : Scala!Block(
+			
+		)
+	do{
+		block.statements;	
+	}
+}
+
+rule GenerateObjectMap(triple : RML!TriplesMap, pm : RML!PredicateMap, om : RML!ObjectMap, gms : Sequence(RML!GraphMap), fallback : Boolean) {
+	using{
+		hasParentTriplesMap : Boolean = not om.parentTriplesMap.oclIsUndefined();
+		hasCondition : Boolean = not om.equalConditions.oclIsUndefined();
+		hasFallbackMap : Boolean = not om.fallbackMaps.oclIsUndefined();
+		triplesName : String = triple.name;
+		clearName : String = thisModule.getClearName(triplesName);
+		sm : RML!SubjectMap = triple.subjectMap;
+		parentTriplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap.get(om.parentTriplesMap);
+		predicateVal : String = thisModule.TermMap2String(triplesName,pm,triple.logicalSource.iterator);
+		oVal : String = thisModule.TermMap2String(triplesName,om,triple.logicalSource.iterator);
+		graphs : Sequence(RML!GraphMap) = gms->union(pm.graphMaps)->union(om.graphMaps);
+	}
+	to
+		f : Scala!Foreach(
+			isDefine <- thisModule.firstTime,
+			relation <- clearName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'), --subject always in the first position
+			generate <- thisModule.CreateEntityLazy(predicateVal),
+			generate <- thisModule.CreateEntityLazy(oVal),
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(triplesName, graphs)),
+			return <- 'objects'
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		ass : Scala!Assignment(
+			right <- f.return,
+			left <- 'result'
+		),
+		om_block : Scala!Block(
+			statements <- thisModule.GeneratePredicateMap(triple, pm),
+			statements <- om.equalConditions->collect(ec | thisModule.GenerateBooleanCondition(triplesName,f.return,ec,false)),
+			statements <- f,
+			statements <- if thisModule.firstTime then ass else u endif
+		),
+		block : Scala!Block(
+		--	statements <- if hasParentTriplesMap then thisModule.GenerateReferencingObjectMap(triple,pm,om,gms) else om_block.statements endif
+		)
+	do{
+		thisModule.firstTime <- false;
+		--thisModule.debug('child:' + triple.name + ' parent:' + parentTriplesMap.name);
+		if (hasParentTriplesMap) {
+			thisModule.debug(om.joinConditions);
+			--RefObjectMap
+			if (not om.joinConditions.oclIsUndefined() and om.joinConditions.notEmpty()) {
+				--with joinCondition
+				block.statements <- block.statements->union(thisModule.GenerateRefObjectMapWithJC(triple, pm, om, gms));
+				thisModule.debug('with join');
+			}
+			else {
+				--no joinCondition
+				if (thisModule.IsSameSource(parentTriplesMap,triple)) {
+					thisModule.debug('sameLS no join');
+					block.statements <- block.statements->union(thisModule.GenerateRefObjectMap_SameLS_NoJoin(triple, pm, om, gms));
+				}
+				else {
+					--different logical source
+					if (hasCondition) {
+						thisModule.debug('diffLS with BC');
+						block.statements <- block.statements->union(thisModule.GenerateRefObjectMapWithBC(triple, pm, om, gms));
+					}
+					else{
+						thisModule.debug('diffLS no join');
+						block.statements <- block.statements->union(thisModule.GenerateRefObjectMap_DiffLS_NoJoin(triple, pm, om, gms));
+					}
+				}
+			}
+			if (hasFallbackMap) {
+				thisModule.debug('hasFallbackMap');
+				for	(fb in om.fallbackMaps) {
+					block.statements <- block.statements->union(thisModule.GenerateROMFallbackMap(triple, pm, fb, gms));
+				}
+			}
+		}
+		else{
+			thisModule.debug('no ParentTriplesMap');
+			block.statements <- block.statements->union(om_block.statements);
+		}
+		
+		block.statements;
+	}
+}
+
+rule getJoinConditionsChildParams(triplesName : String, jcs : Sequence(RML!JoinCondition)) {
+	using {
+		mapPos : Sequence(String) = thisModule.mapOfTable.get(triplesName);
+		result : Sequence(Scala!AliasedEntity) = Sequence{};
+	}
+	do{
+		for	(jc in jcs) {
+
+			result <- result.append(thisModule.CreateEntityLazy('r._'+(mapPos->indexOf(jc.child)+1)));
+		}
+
+		result;
+	}
+}
+
+rule getJoinConditionsParentParams(triplesName : String, jcs : Sequence(RML!JoinCondition)) {
+	using {
+		mapPos : Sequence(String) = thisModule.mapOfTable.get(triplesName);
+		result : Sequence(Scala!AliasedEntity) = Sequence{};
+	}
+	do{
+		for	(jc in jcs) {
+
+			result <- result.append(thisModule.CreateEntityLazy('r._'+(mapPos->indexOf(jc.parent)+1)));
+		}
+
+		result;
+	}
+}
+
+rule GenerateRefObjectMapWithJC(triple : RML!TriplesMap, pm : RML!PredicateMap, rom : RML!ObjectMap, gms : Sequence(RML!GraphMap)) {
+	using {
+		childTriplesName : String = triple.name;
+		parentTriplesName : String = rom.parentTriplesMap;
+		childPos : Sequence(String) = thisModule.mapOfTable.get(childTriplesName);
+		parentPos : Sequence(String) = thisModule.mapOfTable.get(parentTriplesName);
+		parentTriplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap.get(parentTriplesName);
+		hasFallbackMap : Boolean = rom.fallbackMaps.oclIsUndefined();
+		graphs : Sequence(RML!GraphMap) = gms->union(pm.graphMaps)->union(rom.graphMaps);
+	}
+	to
+		child : Scala!Foreach(
+			relation <- childTriplesName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			generate <- thisModule.getJoinConditionsChildParams(childTriplesName, rom.joinConditions),
+			return <- 'child'
+		),
+		parent : Scala!Foreach(
+			relation <- parentTriplesName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			generate <- thisModule.getJoinConditionsParentParams(parentTriplesName, rom.joinConditions),
+			return <- 'parent'
+		),
+		j : Scala!Join(
+			relation1 <- thisModule.CreateExpressionLazy(child.return),
+			by1 <- thisModule.CreateExpressionLazy('('+thisModule.param2String(1,rom.joinConditions,',')+')'),
+			relation2 <- thisModule.CreateExpressionLazy(parent.return),
+			by2 <- thisModule.CreateExpressionLazy(thisModule.param2String(1,rom.joinConditions,',')),
+			return <- 'joinTemp'
+		),
+		f : Scala!Foreach(
+			relation <- j.return,
+			generate <- thisModule.CreateEntityLazy('r.getString(1)'),
+			generate <- thisModule.CreateEntityLazy(thisModule.TermMap2String(childTriplesName, pm,triple.logicalSource.iterator)),
+			generate <- thisModule.CreateEntityLazy('r.getString(2)'),
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(childTriplesName, graphs)),
+			return <- 'objects'
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- thisModule.GeneratePredicateMap(triple, pm),
+			statements <- child,
+			statements <- parent,
+			statements <- j,
+			statements <- f,
+			statements <- u
+			--statements <- rom.fallbackMaps->collect(fb | thisModule.GenerateObjectMap(triple, pm, fb, gms))
+		)
+	do{
+		block.statements;
+	}
+}
+
+rule GenerateROMFallbackMap(triple : RML!TriplesMap, pm : RML!PredicateMap, fallback : RML!ObjectMap, gms : Sequence(RML!GraphMap)) {
+	using{
+		triplesName : String = triple.name;
+	}
+	to
+		filter : Scala!Filter(
+			relation <- triplesName + 'refObjectMap',
+			condition <- '(r._1 is not null) and (r._2 is not null) and (r._3 is not null)',
+			return <- filter.relation
+		),
+		g1 : Scala!GroupAll(
+			relation <- filter.return,
+			return <- 'gpom1'
+		),
+		g2 : Scala!GroupAll(
+			relation <- triplesName + 'refObjectMap2',
+			return <- 'gpom1'
+		),
+		c : Scala!Cross(
+			relation1 <- thisModule.CreateExpressionLazy(g1.return),
+			relation2 <- thisModule.CreateExpressionLazy(g2.return),
+			return <- 'cgp'
+		),
+		f : Scala!Foreach(
+			relation <- c.return,
+			generate <- thisModule.CreateEntityLazy('FLATTEN(Fallback(COUNT('+filter.relation+'),r._2,$3))'),
+			return <-filter.relation
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- thisModule.GenerateObjectMap(triple, pm, fallback, gms, true),
+			statements <- filter,
+			statements <- g1,
+			statements <- g2,
+			statements <- c,
+			statements <- f
+		)
+	do{
+		block.statements;	
+	}
+}
+
+rule GenerateRefObjectMapWithBC(triple : RML!TriplesMap, pm : RML!PredicateMap, rom : RML!ObjectMap, gms : Sequence(RML!GraphMap)) {
+	--should handle fallbackMap if exists
+	using{
+		childName : String = triple.name;
+		parentName : String = rom.parentTriplesMap;
+		graphs : Sequence(RML!GraphMap) = gms->union(pm.graphMaps)->union(rom.graphMaps);
+	}
+	to
+		child : Scala!Foreach(
+			relation <- childName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			return <- 'child'
+		),
+		parent : Scala!Foreach(
+			relation <- parentName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			return <- 'parent'
+		),
+		j : Scala!Cross(
+			relation1 <- thisModule.CreateExpressionLazy(child.return),
+			relation2 <- thisModule.CreateExpressionLazy(parent.return),
+			return <- childName + '_predicateObjectMap'
+		),
+		f : Scala!Foreach(
+			relation <- j.return,
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			generate <- thisModule.CreateEntityLazy(thisModule.TermMap2String(childName, pm)),
+			generate <- thisModule.CreateEntityLazy('r._2'),
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(childName, graphs)),
+			return <- j.return
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- thisModule.GeneratePredicateMap(triple, pm),
+			statements <- rom.equalConditions->collect(ec | thisModule.GenerateBooleanCondition(childName,j.left,ec,false)),
+			statements <- child,
+			statements <- parent,
+			statements <- j,
+			statements <- f,
+			statements <- u
+		)
+	do{
+		block.statements;
+	}
+}
+
+rule GenerateRefObjectMap_SameLS_NoJoin(triple : RML!TriplesMap, pm : RML!PredicateMap, rom : RML!ObjectMap, gms : Sequence(RML!GraphMap)) {
+	using{
+		childName : String = triple.name;
+		parentName : String = rom.parentTriplesMap;
+		parentTriplesMap : RML!TriplesMap = thisModule.mapOfTriplesMap.get(parentName);
+		parentSubjectMap : RML!SubjectMap = parentTriplesMap.subjectMap.first();
+		graphs : Sequence(RML!GraphMap) = gms->union(pm.graphMaps)->union(rom.graphMaps);
+	}
+	to
+		f : Scala!Foreach(
+			relation <- childName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),											--subject
+			generate <- thisModule.CreateEntityLazy(thisModule.TermMap2String(childName, pm, triple.logicalSource.iterator)),		--predicate
+			generate <- thisModule.CreateEntityLazy(thisModule.TermMap2String(childName, parentSubjectMap, parentTriplesMap.logicalSource.iterator)),											--object
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(childName, graphs)),		
+			return <- 'objects'
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- thisModule.GeneratePredicateMap(triple, pm),
+			statements <- rom.equalConditions->collect(ec | thisModule.GenerateBooleanCondition(childName,f.return,ec,false)),
+			statements <- f,
+			statements <- u
+		)
+	do{
+		block.statements;	
+	}
+}
+
+rule GenerateRefObjectMap_DiffLS_NoJoin(triple : RML!TriplesMap, pm : RML!PredicateMap, rom : RML!ObjectMap, gms : Sequence(RML!GraphMap)) {
+	using{
+		childName : String = triple.name;
+		parentName : String = rom.parentTriplesMap;
+		graphs : Sequence(RML!GraphMap) = gms->union(pm.graphMaps)->union(rom.graphMaps);
+	}
+	to
+		child : Scala!Foreach(
+			relation <- childName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			return <- 'child'
+		),
+		parent : Scala!Foreach(
+			relation <- parentName + '_table',
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			return <- 'parent'
+		),
+		j : Scala!Cross(
+			relation1 <- thisModule.CreateExpressionLazy(child.return),
+			relation2 <- thisModule.CreateExpressionLazy(parent.return),
+			return <- childName + '_predicateObjectMap'
+		),
+		f : Scala!Foreach(
+			relation <- j.return,
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			generate <- thisModule.CreateEntityLazy(thisModule.TermMap2String(childName, pm)),
+			generate <- thisModule.CreateEntityLazy('r._2'),
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(childName, graphs)),
+			return <- j.return
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- thisModule.GeneratePredicateMap(triple, pm),
+			statements <- rom.equalConditions->collect(ec | thisModule.GenerateBooleanCondition(childName,j.left,ec,false)),
+			statements <- child,
+			statements <- parent,
+			statements <- j,
+			statements <- f,
+			statements <- u
+		)
+	do{
+		block.statements;	
+	}
+}
+
+rule graphMaps2Graphs(triplesName:String, gms : Sequence(RML!GraphMap))
+{
+	using {
+		graphs : Sequence(String) = Sequence{};
+		
+	}
+	do{
+		if (not gms.oclIsUndefined()) {
+			for (g in gms) {
+				graphs <- graphs->append(thisModule.TermMap2String(triplesName,g));
+			}
+		}
+		graphs;
+	}
+}
+
+helper def : getGraphMaps(sm : RML!SubjectMap, pom : RML!PredicateObjectMap) : Sequence(RML!GraphMap) =
+	let graphs : Sequence(RML!GraphMap) = Sequence{} in
+		graphs->union(sm.graphMaps)->union(pom.graphMaps);
+
+helper def : grpahs2Bag(graphs : Sequence(RML!GraphMap)) : Scala!AliasedEntity = 
+	if graphs.oclIsUndefined() or graphs.size() < 1 then
+		Scala!AliasedEntity
+	else
+		thisModule.CreateEntityLazy('FLATTEN(toBag('+thisModule.Sequence2String(graphs)+'))')
+	endif;
+
+rule Namespace2Foreach(n : RML!Namespace) {
+	to
+		d1 : Scala!Tuple3(
+			f1 <- '"@prefix"',
+			f2 <- '"'+n.prefix+'"',
+			f3 <- '"'+n.iri+'"'
+		),
+		d2 : Scala!Tuple3(
+			f1 <- '"@base"',
+			f2 <- '""',
+			f3 <- '"'+n.base+'"'
+		)
+	do{
+		if n.base.oclIsUndefined() then d1 else d2 endif;
+	}
+}
+
+rule Class2Union(triple : RML!TriplesMap) {
+	using {
+		name : String = triple.name + '_subjectMaps';
+	}
+	to
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy(name),
+			relation2 <- thisModule.CreateExpressionLazy(name + (thisModule.count-1)),
+			return <- name
+		)
+	do{
+		thisModule.count <- thisModule.count - 1;
+		u;
+	}
+}
+
+rule Class2Foreach(class : RML!CLASS, triple : RML!TriplesMap, pn : Integer, nodeName : String) {
+	using{
+		triplesName : String = triple.name;
+		clearName : String = thisModule.getTripleName(triple);
+		graphs : Sequence(RML!GraphMap) = triple.subjectMap.first().graphMaps;
+		val : String = if class.startsWith('http://') then '<'+class+'>' else class endif; 
+	}
+	to
+		f1 : Scala!Foreach(
+			isDefine <- thisModule.firstTime,
+			relation <- nodeName,
+			generate <- thisModule.CreateEntityLazy('r._1'),
+			generate <- thisModule.CreateEntityLazy('"rdf:type"'),
+			generate <- thisModule.CreateEntityLazy('"'+val+'"'),
+			generate <- thisModule.grpahs2Bag(thisModule.graphMaps2Graphs(triplesName, graphs)),
+			return <- 'subject'
+		),
+		a : Scala!Assignment(
+			isDefine <- thisModule.firstTime,
+			left <- 'result',
+			right <- f1.return
+		),
+		u : Scala!Union(
+			relation1 <- thisModule.CreateExpressionLazy('result'),
+			relation2 <- thisModule.CreateExpressionLazy(f1.return),
+			return <- 'result'
+		),
+		block : Scala!Block(
+			statements <- f1,
+			statements <- if thisModule.firstTime then a else u endif
+		)
+		
+	do{
+		--thisModule.firstTime <- false;
+		thisModule.debug('Class2Foreach: firstTime');
+		--thisModule.mapOfFormul <- thisModule.mapOfFormul->including(triple.name, formulation->toLower());
+		block;
+	}
+}
+
+lazy rule CreateExpressionLazy {
+	from 
+		l : String
+	to
+		e : Scala!Expression(
+			value <- l
+		)
+}
+
+lazy rule CreateAliasedEntityLazy{
+	from 
+		str_exp : String,
+		str_alias : String
+	to
+		ae : Scala!AliasedEntity(
+			exp <- str_exp,
+			alias <- str_alias
+		)
+}
+
+lazy rule CreateEntityLazy{
+	from
+		str_exp : String
+	to
+		ae : Scala!AliasedEntity(
+			exp <- str_exp
+		)
+}
+
+helper def : CallGenerateObjectMap(triple : RML!TriplesMap,
+		p : RML!PredicateMap,
+		o : RML!ObjectMap) : Scala!Block = 
+	if o.refObjectMap.oclIsUndefined() then
+		thisModule.GenerateObjectMap(triple, p, o)
+	else
+		thisModule.GenerateRefObjectMap(triple, p, o.refObjectMap)
+	endif;
+
+helper def : CallGenerateRefObjectMap(triple : RML!TriplesMap,
+		p : RML!PredicateMap,
+		r : RML!RefObjectMap,
+		g : Sequence(RML!GraphMap)) : Scala!Block = 
+	if r.joinConditions.oclIsUndefined() or r.joinConditions->size() < 1 then
+		thisModule.GenerateRefObjectMapWihtoutJoinCondition(triple, p, r, g)
+	else
+		thisModule.GenerateRefObjectMap(triple, p, r, g)
+	endif;
+
+helper def : template2Format(template : String) : String = 
+	template.regexReplaceAll('\\{[^\\{\\}]*\\}','%s');
+helper def : reference2Format(reference : String) : String = 
+	reference.regexReplaceAll('[^,]+','%s');
+helper def : getTemplateName(tripleName : String) : String = 
+	'${' + tripleName + '_template}';
+rule extractValueFromTemplate(template : String, iterator : OclAny)
+{
+	using{
+		str : String = template.regexReplaceAll('^[<"](.*)[">]$','$1').regexReplaceAll('\\}[^{}]*\\{', ',').regexReplaceAll('[^\\{\\},]*\\{','').regexReplaceAll('[}>]','');
+		result : String = '';
+	}
+	do{
+		--thisModule.debug('---Enter extractValueFromTemplate---');
+		str <- str.regexReplaceAll('\\\\\\\\', '').trim();
+		if (iterator.oclIsTypeOf(String)) {
+			iterator <- thisModule.removeQuotes(iterator);
+			if (iterator.size() > 0) {
+				--thisModule.debug('need full path: ' + iterator);
+				result <- thisModule.getFullPath(str, iterator);
+			}
+		}
+		else{
+			result <- str;
+		}
+		result <- thisModule.removeQuotes(result);
+		thisModule.debug(result);
+		thisModule.debug('---Leave extractValueFromTemplate---');
+		result;
+	}
+}
+helper def : getFullPath(template : String, iterator : String) : String =
+	if template.startsWith('/') or template.startsWith('$') then
+		template 
+	else
+		if iterator.startsWith('/') then
+			template.regexReplaceAll('^', iterator + '/').regexReplaceAll(',', ','+iterator + '/')
+		else
+			template.regexReplaceAll('^', thisModule.string2Regex(iterator) + '.').regexReplaceAll(',', ','+thisModule.string2Regex(iterator) + '.')
+		endif
+	endif;
+			
+rule string2Regex(str : String){
+	using{
+		res : String = str.regexReplaceAll('\\$','\\\\\\$').regexReplaceAll('\\.','\\\\\\.');
+	}
+	do{
+		thisModule.debug('------------------'+res+'----------------');
+		--res.replaceAll('\\*','\\\\\\*');
+		res <- res.regexReplaceAll('\\*','\\\\\\*').regexReplaceAll('\\[','\\\\\\[').regexReplaceAll('\\]','\\\\\\]');
+		thisModule.debug('string2Regex:' + res);
+		
+		res;
+	}
+}
+	
+helper def : getExtract(formul : String) : String = 
+	'R2PEXTRACT(';
+				
+helper def : decode(s : String) : String =
+	s.regexReplaceAll('%3c','<').regexReplaceAll('%3e', '>');
+			
+rule getParameters(template : String) {
+	using {
+		arr : Sequence(String) = template.split(',');
+		result : String = 'r._1';
+		i : Integer = 1;
+	}
+	do{
+		arr <- arr.subSequence(2, arr.size());
+		for(str in arr) {
+			result <- result + ',$' + i;
+			i <- i + 1;
+		}
+		result;
+	}
+}
+
+rule getCommonPrefix(p1 : String, p2 : String) {
+	using{
+		prefix : String = p2;
+		seq : Sequence(String) = p2.toSequence();
+		isStop : Boolean = false;
+		log : String = '';
+	}
+	do{
+		for(c in seq) {
+			if (not p1.startsWith(prefix)) {
+				prefix <- prefix.substring(1, prefix.size()-1);
+			}
+		}
+		prefix <- prefix.regexReplaceAll('(.*)(\\.|/).*$','r._2');
+		log <- p1.substring(prefix.size()+2,p1.size());
+		thisModule.debug('log:' + log + '   size:' + prefix.size());
+		prefix;
+	}
+}
+
+--rule getRefObjectMap
+rule convertMap2Parameters(tripleName : String) {
+	using {
+		parameters : Sequence(String) = thisModule.mapOfTable->get(tripleName);--可能为空,全是constant
+		clearName : String = thisModule.getClearName(tripleName);
+		result : String = '';
+		triple : RML!TriplesMap = RML!TriplesMap;
+		tname : String = '';
+		iterator : String = '';
+		value : String = '';
+	}
+	do{
+		thisModule.debug('convertMap2Parameters：'+thisModule.mapOfTable);
+        for (p in parameters) {
+        	if (p.startsWith('${')) {
+    			tname <- p.regexReplaceAll('\\$\\{([\\w|%]+)_template}', '$1');
+        		triple <- thisModule.mapOfTriplesMap->get(tname);
+        		thisModule.debug('convertMap2Parameters - template:' + triple.subjectMap.first().template.value);
+        		thisModule.debug('convertMap2Parameters - iterator:' + triple.logicalSource.iterator);
+        		p <- thisModule.extractValueFromTemplate(thisModule.getTermMapValue(triple.subjectMap.first(), ''), triple.logicalSource.iterator);
+        		p <- thisModule.removeQuotes(p);
+        	}
+        	result <- result + ',["'+p+'"]';
+        }
+		if (result.size() > 0){
+        	result <- '['+result.substring(2, result.size())+']';
+		}
+		thisModule.debug('convertMap2Parameters:' + result);
+		result;
+	}
+}
+
+--in example Sequence{1,2,3,4,5}
+--out example String '1,2,3,4,5'
+rule Sequence2String(seq : Sequence(String)) {
+	using{
+		result : String = '';	
+	}
+	do{
+		if (seq->size() > 0) {
+			for(s in seq) {
+				result <- result + thisModule.decode(s) + ',';
+			}
+			result <- result.substring(1, result->size()-1);
+		}
+		thisModule.debug('sequence' + seq);
+		thisModule.debug('size:' + result->size());
+		result;
+	}
+}
+
+helper def : getIRI(iri : RML!IRI) : String =
+	iri.value;--iri.prefixedName + ':' + iri.IRIREF;
+
+helper def : removeQuotes(str : OclAny) : String =
+	if str.oclIsTypeOf(String) then str.regexReplaceAll('^"(.*)"$','$1') else '' endif;
+helper def : removeBracketsAndQuotes(str : OclAny) : String =
+	if str.oclIsTypeOf(String) then str.regexReplaceAll('^["<](.*)[">]$','$1') else '' endif;
+
+---------------------------- new rules -------------------------------------
+rule extractTemplateValue(template : String) {
+	using {
+		result : String = template.regexReplaceAll('^[<"](.*)[">]$','$1').regexReplaceAll('[^\\{\\},]*\\{','').regexReplaceAll('}','');
+	}
+	do{
+		result;
+	}
+}
+
+rule getTermMapValue(termMap : RML!TermMap, type : String) {
+	using {
+		value : String = '';
+		hasTermType : Boolean = not termMap.termtype.oclIsUndefined();
+		termType : String = '';
+		base : String = thisModule.mapOfPrefix.get('base');
+	}
+	do{
+		if (not termMap.oclIsUndefined()) {
+			if (hasTermType) {
+				termType <- termMap.termtype.value;	
+			}
+			else{
+				termType <- 'rr:Literal';
+			}
+			if(type.size() > 0) {
+				if (termType = 'rr:Literal') {
+					termType <- type;
+				}
+			}
+			
+			if (not termMap.template.oclIsUndefined()) {
+				--tempalte
+				value <- termMap.template.value;
+				if (termType = 'rr:BlankNode') {
+					value <- '_:' + thisModule.removeQuotes(value);
+				}
+				else if (termType = 'rr:Literal') {
+					value <- termMap.template.value;
+				}
+				else{
+					--IRI
+					if (value.startsWith('"')) {
+						value <- '<' + thisModule.removeQuotes(value) + '>';	
+					}
+				}
+			}
+			else{
+				if (not termMap.reference.oclIsUndefined()) {
+					--reference
+					value <- thisModule.removeQuotes(termMap.reference.value);
+					if (termType = 'rr:BlankNode') {
+						value <- '_:{' + termMap.reference.value + '}';	
+					}
+					else if (termType = 'rr:IRI') {
+						value <- '<' + value + '>';	
+					}
+				}
+				else if (not termMap.constant.oclIsUndefined()){
+					--constant
+					value <- thisModule.removeQuotes(termMap.constant.value);
+					if (value.startsWith('"')) {
+						if (termType = 'rr:IRI') {
+							value <- base + value;
+						}
+					}
+					else if (value.startsWith('<')) {
+						value <- thisModule.ValidateIRI(value);	
+					}
+				}
+			}
+		}
+		value <- value.regexReplaceAll('\\\\\\\\',''); --TC10c TC1015
+		thisModule.debug('TermMapValue:' + value + ' termType:' + termType + ' type:' + type);
+		value;
+	}
+}
+
+--<IOUs#fname> -> <http://example.com/base/IOUs#amount>
+rule ValidateIRI(s : String) {
+	using{
+		iri : String = s.regexReplaceAll('^<(.*)>$', '$1');
+		result : String = '';
+	}
+	do{
+		result <- iri.regexReplaceAll('^([a-z][a-z0-9+.-]*):.*', '');
+		if (result.size() > 0) {
+			result <- thisModule.mapOfPrefix.get('base') + iri;	
+			result <- '<' + result + '>';
+		}
+		else{
+			result <- s;	
+		}
+		thisModule.debug('s:' + s + ', iri:' + result);
+		result;
+	}
+}
+
+--将TermMap转换为
+--1.含有引用  -> template or reference -> R2PFORMAT的形式
+--2.常量 -> template or reference or constant
+rule TermMap2String(tripleName : String, termMap : RML!TermMap, iterator : String) {
+	using{
+		hasTermType : Boolean = not termMap.termtype.oclIsUndefined();
+		hasDatatype : Boolean = not termMap.datatype.oclIsUndefined();
+		hasLanguageTag : Boolean = not termMap.languageTag.oclIsUndefined();
+		hasLanguageMap : Boolean = not termMap.languageMap.oclIsUndefined();
+		hasReference : Boolean = not termMap.reference.oclIsUndefined();
+		hasTemplate : Boolean = not termMap.template.oclIsUndefined();
+		hasConstant : Boolean = not termMap.constant.oclIsUndefined();
+		termType : String = 'rr:IRI';
+		suffix : String = '';
+		mapPos : Sequence(String) = thisModule.mapOfTable->get(tripleName);
+		pn : Integer = -1;
+		value : String = '';
+		termValue : String = '';
+		exval : String = '';
+		result : String = '';
+		prefix : String = '';
+	}
+	do{
+		thisModule.debug('---Enter TermMap2String---');
+		if(not hasTermType) {
+			if (termMap.oclIsTypeOf(RML!ObjectMap)) {
+				if (hasConstant or hasReference or hasDatatype or hasLanguageTag or hasLanguageMap) {
+					--constant "Bad Student"
+					--reference "Name"
+					termType <- 'rr:Literal';
+				}
+			}
+		}
+		else{
+			termType <- termMap.termtype.value;
+		}
+
+		value <- thisModule.getTermMapValue(termMap, termType);
+		exval <- thisModule.extractValueFromTemplate(value, iterator);
+		pn <- mapPos.indexOf(exval) + 1;
+
+		--thisModule.debug('value:'+value+' exvalue:'+exval+' pn:'+pn+' termType:' + termType);
+		if (hasConstant) {
+			--CONSTANT
+			value <- termMap.constant.value;
+			thisModule.debug('constant value:' + value + ' termType:' + termType);
+			if (termType = 'rr:IRI') {
+				if (value.startsWith('<')) {
+					--<http://example.com/test> -> '<http://example.com/test>'
+					--<IOUs#fname> -> <http://example.com/base/IOUs#amount>
+					value <- thisModule.ValidateIRI(value);
+					result <- '"""' + value + '"""';
+				}
+				else if (value.startsWith('"')){
+					--"http://xmlns.com/foaf/0.1/Person" -> '<http://xmlns.com/foaf/0.1/Person>'
+					value <- value.regexReplaceAll('^"(.*)"$', '$1');
+					result <- '"""<' + value + '>"""';	
+				}
+				else{
+					--ex:name -> 'ex:name'
+					result <- '"""' + value + '"""';
+				}
+			}
+			else if (termType = 'rr:BlankNode') {
+				result <- '_:' + value;
+			}
+			else{
+				--rr:Literal
+				if (value.startsWith('<')) {
+					result <- '"""' + thisModule.ValidateIRI(value) + '"""';
+				}
+				else{
+					--"Bad Student" -> '"Bad Student"'
+					result <- '"""' + value + '"""';
+				}
+			}
+		}
+		else if (hasTemplate) {
+			--TEMPALTE
+			value <- termMap.template.value;
+			thisModule.debug('template value:' + value + ' termType:' + termType);
+			if (termType = 'rr:IRI') {
+				--"http://example.com/graph/Student/{ID}/{Name}" -> '<http://example.com/graph/Student/%s/%s>'
+				value <- thisModule.template2Format(value);
+				value <- thisModule.removeQuotes(value);
+				result <- 'R2PFORMAT("""<'+value+'>""",r._'+pn+')';
+			}
+			else if (termType = 'rr:BlankNode') {
+				result <- '_:' + value;
+			}
+			else{
+				--rr:Literal
+				--rr:template "{FirstName} {LastName}"; 
+				value <- thisModule.template2Format(value);
+				result <- 'R2PFORMAT("""'+value+'""",r._'+pn+')';
+			}
+		}
+		else if (hasReference){
+			--REFERENCE
+			value <- termMap.reference.value;
+			thisModule.debug('reference value:' + value + ' termType:' + termType);
+			if (termType = 'rr:IRI') {
+				--rml:reference "FirstName" -> <FirstName> //without "
+				result <- '<' + value + '>';
+			}
+			else if (termType = 'rr:BlankNode') {
+				result <- 'R2PFORMAT("""_:'+'%s'+suffix+'""",r._'+pn+')';
+			}
+			else{
+				--rr:Literal
+				if (hasDatatype) {
+					suffix <- '^^' + termMap.datatype.value;
+					thisModule.debug('datatype:' + termMap.datatype.value);
+				}
+				if (hasLanguageTag) {
+					suffix <- '@' + thisModule.removeQuotes(termMap.languageTag);
+					thisModule.debug('languageTag:' + result);
+				}
+				if (hasLanguageMap) {
+					thisModule.debug('languageMap:' + result);
+					if (not termMap.languageMap.reference.oclIsUndefined()) {
+						suffix <- '@%s';
+						exval <- thisModule.extractValueFromTemplate(termMap.languageMap.reference.value, iterator);
+						result <- 'R2PFORMAT("""'+'"%s"'+suffix+'""",r._'+pn+',r._'+mapPos.indexOf(exval)+')';
+					}
+					else if (not termMap.languageMap.constant.oclIsUndefined()) {
+						suffix <- '@' + thisModule.removeQuotes(termMap.languageMap.constant.value);
+						result <- 'R2PFORMAT("""'+'"%s"'+suffix+'""",r._'+pn+')';
+					}
+				}
+				else{
+					result <- 'R2PFORMAT("""'+'"%s"'+suffix+'""",r._'+pn+')';
+				}
+			}
+		}
+		
+		thisModule.debug('value_finish:'+result);
+		thisModule.debug('---Leave TermMap2String---');
+		result;
+	}
+}

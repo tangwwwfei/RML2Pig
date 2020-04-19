@@ -1,0 +1,119 @@
+query 
+	Scala2Text = 
+		Scala!Program.allInstances()->
+			collect(c| c.toString().writeTo(c.absolutePath+'.scala'))
+	;
+
+helper def : decode(s : String) : String =
+	s.regexReplaceAll('%3c', '<').regexReplaceAll('%3e', '>');
+
+helper context Scala!Program def: toString(indent: String): String =
+	'import org.apache.spark.sql.types._\r\n'+
+	'import org.apache.spark.sql.{DataFrame, Row, SparkSession}\r\n'+
+	'import r2ps.udf.scala.ScalaUDF.R2PLOADSOURCE\r\n'+
+	'import r2ps.udf.scala.ScalaUDF.R2PFORMAT\r\n'+
+
+	'object test extends App {\r\n'+
+	  '\tval spark = SparkSession\r\n'+
+	    '\t\t.builder()\r\n'+
+	    '\t\t.appName("RML2Scala")\r\n'+
+	    '\t\t.master(args(1))\r\n'+
+	    '\t\t.getOrCreate()\r\n'+
+	  '\tval sqlContext = spark.sqlContext\r\n'+
+	  '\tvar sparkContext = spark.sparkContext\r\n'+
+	  '\timport spark.implicits._\r\n\r\n'+
+
+	self.blocks->iterate(s; acc : String = '' | acc + thisModule.decode(s.toString())) + 
+	--'\tresult = result.distinct()\r\n'+
+	'}'
+;
+	
+helper context Scala!Block def: toString(): String =
+	self.statements->iterate(s; acc : String = '' | acc + s.toString() + '\r\n')
+;
+
+helper context Scala!Statement def: toString(): String =
+	''-- + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif
+;
+
+helper context Scala!Define def: toString(): String =
+	'DEFINE ' + self.newName + ' ' + self.oldName + ';\r\n'
+;
+
+helper context Scala!Default def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'val ' else '' endif +
+	self.name + ' = """' + self.value + '"""\r\n'
+;
+
+helper context Scala!Register def: toString(): String =
+	'Register '  + self.value + ';\r\n'
+;
+
+helper context Scala!Foreach def: toString(): String =
+	let n : Integer = self.generate.size() in 
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = ' + self.relation + '.map(r=>(' + 
+	self.generate->first().toString() + 
+	self.generate->subSequence(2, n)->iterate(s; acc : String = '' | acc + ',' + s.toString()) +
+	'))'
+;
+	
+helper context Scala!Extract def: toString(): String =
+	let n : Integer = self.parameters.size() in
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = R2PEXTRACT(' +
+	self.parameters->first().toString() + 
+	self.parameters->subSequence(2, n)->iterate(s; acc : String = '' | acc + ',' + s.toString()) + ')\r\n'
+;
+
+helper context Scala!Cross def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = cross ' + self.relation1.toString()  + ',' + self.relation2.toString() + ';\r\n'
+;
+	
+helper context Scala!Join def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = ' + self.relation1.toString() + '.join(' + self.relation2.toString() +',"'+ self.by2.toString().regexReplaceAll('r\\.','') + '")\r\n'
+;
+	
+helper context Scala!Load def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = ' + self.using.toString() + '\r\n'
+;
+
+helper context Scala!Union def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = '+ self.relation1.toString()+'.union('  + self.relation2.toString() + ')\r\n'
+;
+
+helper context Scala!Expression def: toString(): String =
+	self.value
+;
+
+helper context Scala!Assignment def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.left + ' = ' + self.right.toString() + ';\r\n'
+;
+	
+helper context Scala!Tuple3 def: toString(): String =
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	'('+self.f1+','+self.f2+','+self.f3+')'
+;
+
+helper context Scala!Seq def: toString(): String =
+	let n : Integer = self.tuples.size() in 
+	'\t' + if not self.isDefine.oclIsUndefined() and self.isDefine = true then 'var ' else '' endif +
+	self.return + ' = Seq(' + 
+	self.tuples->first().toString() + 
+	self.tuples->subSequence(2, n)->iterate(s; acc : String = '' | acc + ',\r\n' + s.toString()) +
+	')'
+;
+
+helper context Scala!AliasedEntity def: toString(): String =
+	if (self.alias.oclIsUndefined()) then
+		self.exp
+	else
+		self.exp + ' as ' + self.alias
+	endif
+;
+

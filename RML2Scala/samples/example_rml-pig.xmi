@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pig="https://pig.apache.org/">
+  <pig:Program>
+    <blocks>
+      <statements xsi:type="pig:Default" name="AirportMapping_source" value="{&quot;iterator&quot;:&quot;&quot;,&quot;referenceFormulation&quot;:&quot;ql:CSV&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Airport.csv&quot;}"/>
+      <statements xsi:type="pig:Default" name="AirportMapping_referenceFormulation" value="ql:CSV"/>
+      <statements xsi:type="pig:Default" name="AirportMapping_iterator" value=""/>
+      <statements xsi:type="pig:Default" name="AirportMapping_template" value="http://airport.example.com/{id}"/>
+      <statements xsi:type="pig:Load" return="AirportMapping_data">
+        <path value="http://www.example.com/Airport.csv"/>
+        <using exp="my.udf.LoadSource('${AirportMapping_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="LocationMapping_CSV_source" value="{&quot;iterator&quot;:&quot;&quot;,&quot;referenceFormulation&quot;:&quot;ql:CSV&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Airport.csv&quot;}"/>
+      <statements xsi:type="pig:Default" name="LocationMapping_CSV_referenceFormulation" value="ql:CSV"/>
+      <statements xsi:type="pig:Default" name="LocationMapping_CSV_iterator" value=""/>
+      <statements xsi:type="pig:Default" name="LocationMapping_CSV_template" value="http://loc.example.com/latlong/{latitude},{longitude}"/>
+      <statements xsi:type="pig:Load" return="LocationMapping_CSV_data">
+        <path value="http://www.example.com/Airport.csv"/>
+        <using exp="my.udf.LoadSource('${LocationMapping_CSV_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="VenueMapping_source" value="{&quot;iterator&quot;:&quot;$&quot;,&quot;referenceFormulation&quot;:&quot;ql:JSONPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Venue.json&quot;}"/>
+      <statements xsi:type="pig:Default" name="VenueMapping_referenceFormulation" value="ql:JSONPath"/>
+      <statements xsi:type="pig:Default" name="VenueMapping_iterator" value="$"/>
+      <statements xsi:type="pig:Default" name="VenueMapping_template" value="http://loc.example.com/city/{$.venue[*].location.city}"/>
+      <statements xsi:type="pig:Load" return="VenueMapping_data">
+        <path value="http://www.example.com/Venue.json"/>
+        <using exp="my.udf.LoadSource('${VenueMapping_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="LocationMapping_JSON_source" value="{&quot;iterator&quot;:&quot;$&quot;,&quot;referenceFormulation&quot;:&quot;ql:JSONPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Venue.json&quot;}"/>
+      <statements xsi:type="pig:Default" name="LocationMapping_JSON_referenceFormulation" value="ql:JSONPath"/>
+      <statements xsi:type="pig:Default" name="LocationMapping_JSON_iterator" value="$"/>
+      <statements xsi:type="pig:Default" name="LocationMapping_JSON_template" value="http://loc.example.com/latlong/{$.venue[*].latitude},{$.venue[*].longitude}"/>
+      <statements xsi:type="pig:Load" return="LocationMapping_JSON_data">
+        <path value="http://www.example.com/Venue.json"/>
+        <using exp="my.udf.LoadSource('${LocationMapping_JSON_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="TransportMapping_source" value="{&quot;iterator&quot;:&quot;/transport/bus&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Transport.xml&quot;}"/>
+      <statements xsi:type="pig:Default" name="TransportMapping_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="pig:Default" name="TransportMapping_iterator" value="/transport/bus"/>
+      <statements xsi:type="pig:Default" name="TransportMapping_template" value="http://trans.example.com/bus/{@id}"/>
+      <statements xsi:type="pig:Load" return="TransportMapping_data">
+        <path value="http://www.example.com/Transport.xml"/>
+        <using exp="my.udf.LoadSource('${TransportMapping_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="StopMapping_source" value="{&quot;iterator&quot;:&quot;/transport/bus/route/stop&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;http://www.example.com/Transport.xml&quot;}"/>
+      <statements xsi:type="pig:Default" name="StopMapping_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="pig:Default" name="StopMapping_iterator" value="/transport/bus/route/stop"/>
+      <statements xsi:type="pig:Default" name="StopMapping_template" value="http://trans.example.com/stop/{@id}"/>
+      <statements xsi:type="pig:Load" return="StopMapping_data">
+        <path value="http://www.example.com/Transport.xml"/>
+        <using exp="my.udf.LoadSource('${StopMapping_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="LocationMapping_CSV_data" return="LocationMapping_CSV_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${LocationMapping_CSV_referenceFormulation}',&#xD;&#xA;&#x9;'${LocationMapping_CSV_iterator}',&#xD;&#xA;&#x9;toTuple('latitude,longitude'),&#xD;&#xA;&#x9;toTuple('latitude'),&#xD;&#xA;&#x9;toTuple('longitude')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="LocationMapping_CSV_table" return="LocationMapping_CSV_table">
+          <generate exp="FORMAT('${LocationMapping_CSV_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+          <generate exp="$2"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="AirportMapping_data" return="AirportMapping_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${AirportMapping_referenceFormulation}',&#xD;&#xA;&#x9;'${AirportMapping_iterator}',&#xD;&#xA;&#x9;toTuple('id'),&#xD;&#xA;&#x9;toTuple('latitude,longitude'),&#xD;&#xA;&#x9;toTuple('bus'),&#xD;&#xA;&#x9;toTuple('city')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="AirportMapping_table" return="AirportMapping_table">
+          <generate exp="FORMAT('${AirportMapping_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+          <generate exp="$2"/>
+          <generate exp="$3"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="VenueMapping_data" return="VenueMapping_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${VenueMapping_referenceFormulation}',&#xD;&#xA;&#x9;'${VenueMapping_iterator}',&#xD;&#xA;&#x9;toTuple('$.venue[*].location.city'),&#xD;&#xA;&#x9;toTuple('$.venue[*].latitude,$.venue[*].longitude'),&#xD;&#xA;&#x9;toTuple('$.venue[*].location.country'),&#xD;&#xA;&#x9;toTuple('$.venue[*].location.continent')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="VenueMapping_table" return="VenueMapping_table">
+          <generate exp="FORMAT('${VenueMapping_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+          <generate exp="$2"/>
+          <generate exp="$3"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="TransportMapping_data" return="TransportMapping_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${TransportMapping_referenceFormulation}',&#xD;&#xA;&#x9;'${TransportMapping_iterator}',&#xD;&#xA;&#x9;toTuple('/transport/bus/@id'),&#xD;&#xA;&#x9;toTuple('/transport/bus@id'),&#xD;&#xA;&#x9;toTuple('/transport/bus/@type'),&#xD;&#xA;&#x9;toTuple('/transport/bus/route/stop/@id')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="TransportMapping_table" return="TransportMapping_table">
+          <generate exp="FORMAT('${TransportMapping_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+          <generate exp="$2"/>
+          <generate exp="$3"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="LocationMapping_JSON_data" return="LocationMapping_JSON_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${LocationMapping_JSON_referenceFormulation}',&#xD;&#xA;&#x9;'${LocationMapping_JSON_iterator}',&#xD;&#xA;&#x9;toTuple('$.venue[*].latitude,$.venue[*].longitude'),&#xD;&#xA;&#x9;toTuple('$.venue[*].latitude'),&#xD;&#xA;&#x9;toTuple('$.venue[*].longitude')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="LocationMapping_JSON_table" return="LocationMapping_JSON_table">
+          <generate exp="FORMAT('${LocationMapping_JSON_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+          <generate exp="$2"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="StopMapping_data" return="StopMapping_table">
+          <generate exp="FLATTEN(extract(data,&#xD;&#xA;&#x9;'${StopMapping_referenceFormulation}',&#xD;&#xA;&#x9;'${StopMapping_iterator}',&#xD;&#xA;&#x9;toTuple('/transport/bus/route/stop/@id'),&#xD;&#xA;&#x9;toTuple('/transport/bus/route/stop/.')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="StopMapping_table" return="StopMapping_table">
+          <generate exp="FORMAT('${StopMapping_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+        </statements>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="AirportMapping_subjectMap">
+        <right value="AirportMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_subjectMap" return="AirportMapping_subjectMap">
+        <generate exp="$0"/>
+        <generate exp="'rdf:type'"/>
+        <generate exp="'ex:Stop'"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="RDFS">
+        <right value="AirportMapping_subjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_CSV_subjectMap">
+        <right value="LocationMapping_CSV_table"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="VenueMapping_subjectMap">
+        <right value="VenueMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="VenueMapping_subjectMap" return="VenueMapping_subjectMap">
+        <generate exp="$0"/>
+        <generate exp="'rdf:type'"/>
+        <generate exp="'ex:City'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="VenueMapping_subjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_JSON_subjectMap">
+        <right value="LocationMapping_JSON_table"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TransportMapping_subjectMap">
+        <right value="TransportMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TransportMapping_subjectMap" return="TransportMapping_subjectMap">
+        <generate exp="$0"/>
+        <generate exp="'rdf:type'"/>
+        <generate exp="'ex:Transport'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="TransportMapping_subjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="StopMapping_subjectMap">
+        <right value="StopMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="StopMapping_subjectMap" return="StopMapping_subjectMap">
+        <generate exp="$0"/>
+        <generate exp="'rdf:type'"/>
+        <generate exp="'ex:Stop'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="StopMapping_subjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_table" return="AirportMapping_refObjectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:latlong'"/>
+        <generate exp="FORMAT('&lt;http://loc.example.com/latlong/%s,%s>',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="AirportMapping_refObjectMap"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_table" return="child">
+        <generate exp="$0"/>
+        <generate exp="$3"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TransportMapping_table" return="parent">
+        <generate exp="$0"/>
+        <generate exp="$2"/>
+      </statements>
+      <statements xsi:type="pig:Join" return="AirportMapping_predicateObjectMap">
+        <relation1 value="child"/>
+        <by1 value="($1)"/>
+        <relation2 value="parent"/>
+        <by2 value="($1)"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_predicateObjectMap" return="AirportMapping_predicateObjectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:route'"/>
+        <generate exp="$2"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="AirportMapping_predicateObjectMap"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_table" return="child">
+        <generate exp="$0"/>
+        <generate exp="$4"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="VenueMapping_table" return="parent">
+        <generate exp="$0"/>
+        <generate exp="$1"/>
+      </statements>
+      <statements xsi:type="pig:Join" return="AirportMapping_predicateObjectMap">
+        <relation1 value="child"/>
+        <by1 value="($1)"/>
+        <relation2 value="parent"/>
+        <by2 value="($1)"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="AirportMapping_predicateObjectMap" return="AirportMapping_predicateObjectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:location'"/>
+        <generate exp="$2"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="AirportMapping_predicateObjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_CSV_objectMap">
+        <right value="LocationMapping_CSV_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="LocationMapping_CSV_objectMap" return="LocationMapping_CSV_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:lat'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="LocationMapping_CSV_objectMap"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_CSV_objectMap">
+        <right value="LocationMapping_CSV_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="LocationMapping_CSV_objectMap" return="LocationMapping_CSV_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:long'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="LocationMapping_CSV_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="VenueMapping_table" return="VenueMapping_refObjectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:latlong'"/>
+        <generate exp="FORMAT('&lt;http://loc.example.com/latlong/%s,%s>',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="VenueMapping_refObjectMap"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="VenueMapping_objectMap">
+        <right value="VenueMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="VenueMapping_objectMap" return="VenueMapping_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:countryCode'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="VenueMapping_objectMap"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="VenueMapping_objectMap">
+        <right value="VenueMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="VenueMapping_objectMap" return="VenueMapping_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:onContinent'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$4)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="VenueMapping_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_JSON_objectMap">
+        <right value="LocationMapping_JSON_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="LocationMapping_JSON_objectMap" return="LocationMapping_JSON_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:lat'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="LocationMapping_JSON_objectMap"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="LocationMapping_JSON_objectMap">
+        <right value="LocationMapping_JSON_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="LocationMapping_JSON_objectMap" return="LocationMapping_JSON_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:long'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="LocationMapping_JSON_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TransportMapping_objectMap">
+        <right value="TransportMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TransportMapping_objectMap" return="TransportMapping_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:type'"/>
+        <generate exp="FORMAT('&lt;http://trans.example.com/vehicle/%s>',$3)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="TransportMapping_objectMap"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TransportMapping_table" return="TransportMapping_refObjectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:stop'"/>
+        <generate exp="FORMAT('&lt;http://trans.example.com/stop/%s>',$4)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="TransportMapping_refObjectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="StopMapping_objectMap">
+        <right value="StopMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="StopMapping_objectMap" return="StopMapping_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:stop'"/>
+        <generate exp="FORMAT('&quot;%s&quot;^^xsd:int',$1)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="StopMapping_objectMap"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="StopMapping_objectMap">
+        <right value="StopMapping_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="StopMapping_objectMap" return="StopMapping_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:stopLabel'"/>
+        <generate exp="FORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="StopMapping_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="RDFS" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'rml:'"/>
+        <generate exp="'http://semweb.mmlab.be/ns/rml#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="RDFS" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'ql:'"/>
+        <generate exp="'http://semweb.mmlab.be/ns/ql#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="RDFS" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'rr:'"/>
+        <generate exp="'http://www.w3.org/ns/r2rml#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="RDFS" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'ex:'"/>
+        <generate exp="'http://example.com/ns#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="RDFS">
+        <relation1 value="RDFS"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+  </pig:Program>
+  <pig:Union return="RDFS">
+    <relation1 value="RDFS"/>
+    <relation2 value="AirportMapping_subjectMap"/>
+  </pig:Union>
+  <pig:Block/>
+  <pig:Assignment left="RDFS">
+    <right value="VenueMapping_subjectMap"/>
+  </pig:Assignment>
+  <pig:Block/>
+  <pig:Assignment left="RDFS">
+    <right value="TransportMapping_subjectMap"/>
+  </pig:Assignment>
+  <pig:Block/>
+  <pig:Assignment left="RDFS">
+    <right value="StopMapping_subjectMap"/>
+  </pig:Assignment>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block>
+    <statements xsi:type="pig:Assignment" left="AirportMapping_objectMap">
+      <right value="AirportMapping_table"/>
+    </statements>
+    <statements xsi:type="pig:Foreach" relation="AirportMapping_objectMap" return="AirportMapping_objectMap">
+      <generate exp="$0"/>
+      <generate exp="'ex:latlong'"/>
+      <generate exp="''"/>
+    </statements>
+    <statements xsi:type="pig:Union" return="RDFS">
+      <relation1 value="RDFS"/>
+      <relation2 value="AirportMapping_objectMap"/>
+    </statements>
+  </pig:Block>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block>
+    <statements xsi:type="pig:Assignment" left="AirportMapping_objectMap">
+      <right value="AirportMapping_table"/>
+    </statements>
+    <statements xsi:type="pig:Foreach" relation="AirportMapping_objectMap" return="AirportMapping_objectMap">
+      <generate exp="$0"/>
+      <generate exp="'ex:route'"/>
+      <generate exp="''"/>
+    </statements>
+    <statements xsi:type="pig:Union" return="RDFS">
+      <relation1 value="RDFS"/>
+      <relation2 value="AirportMapping_objectMap"/>
+    </statements>
+  </pig:Block>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block>
+    <statements xsi:type="pig:Assignment" left="AirportMapping_objectMap">
+      <right value="AirportMapping_table"/>
+    </statements>
+    <statements xsi:type="pig:Foreach" relation="AirportMapping_objectMap" return="AirportMapping_objectMap">
+      <generate exp="$0"/>
+      <generate exp="'ex:location'"/>
+      <generate exp="''"/>
+    </statements>
+    <statements xsi:type="pig:Union" return="RDFS">
+      <relation1 value="RDFS"/>
+      <relation2 value="AirportMapping_objectMap"/>
+    </statements>
+  </pig:Block>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block>
+    <statements xsi:type="pig:Assignment" left="VenueMapping_objectMap">
+      <right value="VenueMapping_table"/>
+    </statements>
+    <statements xsi:type="pig:Foreach" relation="VenueMapping_objectMap" return="VenueMapping_objectMap">
+      <generate exp="$0"/>
+      <generate exp="'ex:latlong'"/>
+      <generate exp="''"/>
+    </statements>
+    <statements xsi:type="pig:Union" return="RDFS">
+      <relation1 value="RDFS"/>
+      <relation2 value="VenueMapping_objectMap"/>
+    </statements>
+  </pig:Block>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block>
+    <statements xsi:type="pig:Assignment" left="TransportMapping_objectMap">
+      <right value="TransportMapping_table"/>
+    </statements>
+    <statements xsi:type="pig:Foreach" relation="TransportMapping_objectMap" return="TransportMapping_objectMap">
+      <generate exp="$0"/>
+      <generate exp="'ex:stop'"/>
+      <generate exp="''"/>
+    </statements>
+    <statements xsi:type="pig:Union" return="RDFS">
+      <relation1 value="RDFS"/>
+      <relation2 value="TransportMapping_objectMap"/>
+    </statements>
+  </pig:Block>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Foreach relation="RDFS" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@563b8775.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="RDFS" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@563b8775.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="RDFS" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@563b8775.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="RDFS" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@563b8775.'"/>
+  </pig:Foreach>
+</xmi:XMI>

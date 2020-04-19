@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scala="https://pig.apache.org/">
+  <scala:Program absolutePath="E:\RML2PigAndScala\test\resources\passed\bdtest\xml.rml.ttl">
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="PersonMapping_source" value="{&quot;iterator&quot;:&quot;/persons/person&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;persons.xml&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="PersonMapping_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="PersonMapping_iterator" value="/persons/person"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="PersonMapping_template" value="&lt;http://example.org/person/{id}{name}>"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="R2PLOADSOURCE(PersonMapping_source,&quot;&quot;&quot;[[&quot;/persons/person/id,/persons/person/name&quot;],[&quot;/persons/person/name&quot;],[&quot;/persons/person/email&quot;],[&quot;/persons/person/phone&quot;],[&quot;/persons/person/birthdate&quot;],[&quot;/persons/person/height&quot;],[&quot;/persons/person/weight&quot;]]&quot;&quot;&quot;)" return="PersonMapping_data">
+        <path value="persons.xml"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Assignment" isDefine="true" left="PersonMapping_df" right="createDF(PersonMapping_data)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="PersonMapping_df" return="PersonMapping_table">
+          <generate exp="R2PFORMAT(PersonMapping_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+          <generate exp="r.getString(3)"/>
+          <generate exp="r.getString(4)"/>
+          <generate exp="r.getString(5)"/>
+          <generate exp="r.getString(6)"/>
+        </statements>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" isDefine="true" relation="PersonMapping_table" return="subject">
+        <generate exp="r._1"/>
+        <generate exp="&quot;rdf:type&quot;"/>
+        <generate exp="&quot;foaf:Person&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Assignment" isDefine="true" left="result" right="subject"/>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" isDefine="true" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;foaf:name&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&quot;%s&quot;&quot;&quot;&quot;,r._3)"/>
+      </statements>
+      <statements xsi:type="scala:Assignment" left="result" right="objects"/>
+      <statements xsi:type="scala:Foreach" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;foaf:mbox&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&lt;mailto:%s>&quot;&quot;&quot;,r._4)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;foaf:phone&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&lt;tel:%s>&quot;&quot;&quot;,r._5)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;schema:birthDate&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&quot;%s&quot;^^xsd:dateTime&quot;&quot;&quot;,r._6)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;schema:height&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&quot;%s&quot;^^xsd:decimal&quot;&quot;&quot;,r._7)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="PersonMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="&quot;&quot;&quot;schema:weight&quot;&quot;&quot;"/>
+        <generate exp="R2PFORMAT(&quot;&quot;&quot;&quot;%s&quot;^^xsd:decimal&quot;&quot;&quot;,r._8)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Seq" isDefine="true" return="prefixes">
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rr:&quot;" f3="&quot;&lt;http://www.w3.org/ns/r2rml#>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rml:&quot;" f3="&quot;&lt;http://semweb.mmlab.be/ns/rml#>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;ql:&quot;" f3="&quot;&lt;http://semweb.mmlab.be/ns/ql#>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;xsd:&quot;" f3="&quot;&lt;http://www.w3.org/2001/XMLSchema#>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;ex:&quot;" f3="&quot;&lt;http://www.example.org/>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;foaf:&quot;" f3="&quot;&lt;http://xmlns.com/foaf/0.1/>&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;schema:&quot;" f3="&quot;&lt;http://schema.org/>&quot;"/>
+        <tuples f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;http://example.org/>&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="prefixes.toDS()"/>
+      </statements>
+    </blocks>
+  </scala:Program>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Tuple3 f1="&quot;@prefix&quot;" f2="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;" f3="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@68c809dd&quot;"/>
+  <scala:Union return="result">
+    <relation1 value="result"/>
+    <relation2 value="subject"/>
+  </scala:Union>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Union return="result">
+    <relation1 value="result"/>
+    <relation2 value="objects"/>
+  </scala:Union>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+</xmi:XMI>

@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scala="https://pig.apache.org/">
+  <scala:Program>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="AirportMapping_source" value="{&quot;iterator&quot;:&quot;&quot;,&quot;referenceFormulation&quot;:&quot;ql:CSV&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Airport.csv&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="AirportMapping_referenceFormulation" value="ql:CSV"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="AirportMapping_iterator" value=""/>
+      <statements xsi:type="scala:Default" isDefine="true" name="AirportMapping_template" value="http://airport.example.com/{id}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="AirportMapping_source" return="AirportMapping_data">
+        <path value="Airport.csv"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_CSV_source" value="{&quot;iterator&quot;:&quot;&quot;,&quot;referenceFormulation&quot;:&quot;ql:CSV&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Airport.csv&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_CSV_referenceFormulation" value="ql:CSV"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_CSV_iterator" value=""/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_CSV_template" value="http://loc.example.com/latlong/{latitude},{longitude}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="LocationMapping_CSV_source" return="LocationMapping_CSV_data">
+        <path value="Airport.csv"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="VenueMapping_source" value="{&quot;iterator&quot;:&quot;$&quot;,&quot;referenceFormulation&quot;:&quot;ql:JSONPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Venue.json&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="VenueMapping_referenceFormulation" value="ql:JSONPath"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="VenueMapping_iterator" value="$"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="VenueMapping_template" value="http://loc.example.com/city/{$.venue[*].location.city}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="VenueMapping_source" return="VenueMapping_data">
+        <path value="Venue.json"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_JSON_source" value="{&quot;iterator&quot;:&quot;$&quot;,&quot;referenceFormulation&quot;:&quot;ql:JSONPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Venue.json&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_JSON_referenceFormulation" value="ql:JSONPath"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_JSON_iterator" value="$"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="LocationMapping_JSON_template" value="http://loc.example.com/latlong/{$.venue[*].latitude},{$.venue[*].longitude}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="LocationMapping_JSON_source" return="LocationMapping_JSON_data">
+        <path value="Venue.json"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="TransportMapping_source" value="{&quot;iterator&quot;:&quot;/transport/bus&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Transport.xml&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="TransportMapping_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="TransportMapping_iterator" value="/transport/bus"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="TransportMapping_template" value="http://trans.example.com/bus/{@id}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="TransportMapping_source" return="TransportMapping_data">
+        <path value="Transport.xml"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Default" isDefine="true" name="StopMapping_source" value="{&quot;iterator&quot;:&quot;/transport/bus/route/stop&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;Transport.xml&quot;}"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="StopMapping_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="StopMapping_iterator" value="/transport/bus/route/stop"/>
+      <statements xsi:type="scala:Default" isDefine="true" name="StopMapping_template" value="http://trans.example.com/stop/{@id}"/>
+      <statements xsi:type="scala:Load" isDefine="true" using="StopMapping_source" return="StopMapping_data">
+        <path value="Transport.xml"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="LocationMapping_CSV_temptable">
+          <parameters>[[&quot;latitude,longitude&quot;],[&quot;latitude&quot;],[&quot;longitude&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="LocationMapping_CSV_df" right="createDF(LocationMapping_CSV_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="LocationMapping_CSV_df" return="LocationMapping_CSV_table">
+          <generate exp="R2PFORMAT(LocationMapping_CSV_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+        </statements>
+      </statements>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="AirportMapping_temptable">
+          <parameters>[[&quot;id&quot;],[&quot;latitude,longitude&quot;],[&quot;bus&quot;],[&quot;city&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="AirportMapping_df" right="createDF(AirportMapping_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="AirportMapping_df" return="AirportMapping_table">
+          <generate exp="R2PFORMAT(AirportMapping_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+          <generate exp="r.getString(3)"/>
+        </statements>
+      </statements>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="VenueMapping_temptable">
+          <parameters>[[&quot;$.venue[*].location.city&quot;],[&quot;$.venue[*].latitude,$.venue[*].longitude&quot;],[&quot;$.venue[*].location.country&quot;],[&quot;$.venue[*].location.continent&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="VenueMapping_df" right="createDF(VenueMapping_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="VenueMapping_df" return="VenueMapping_table">
+          <generate exp="R2PFORMAT(VenueMapping_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+          <generate exp="r.getString(3)"/>
+        </statements>
+      </statements>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="TransportMapping_temptable">
+          <parameters>[[&quot;/transport/bus/@id&quot;],[&quot;/transport/bus/@type&quot;],[&quot;/transport/bus/route/stop/@id&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="TransportMapping_df" right="createDF(TransportMapping_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="TransportMapping_df" return="TransportMapping_table">
+          <generate exp="R2PFORMAT(TransportMapping_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+        </statements>
+      </statements>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="LocationMapping_JSON_temptable">
+          <parameters>[[&quot;$.venue[*].latitude,$.venue[*].longitude&quot;],[&quot;$.venue[*].latitude&quot;],[&quot;$.venue[*].longitude&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="LocationMapping_JSON_df" right="createDF(LocationMapping_JSON_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="LocationMapping_JSON_df" return="LocationMapping_JSON_table">
+          <generate exp="R2PFORMAT(LocationMapping_JSON_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+          <generate exp="r.getString(2)"/>
+        </statements>
+      </statements>
+      <statements xsi:type="scala:Block">
+        <statements xsi:type="scala:Extract" isDefine="true" return="StopMapping_temptable">
+          <parameters>[[&quot;/transport/bus/route/stop/@id&quot;],[&quot;/transport/bus/route/stop/.&quot;]]</parameters>
+        </statements>
+        <statements xsi:type="scala:Assignment" isDefine="true" left="StopMapping_df" right="createDF(StopMapping_temptable)"/>
+        <statements xsi:type="scala:Foreach" isDefine="true" relation="StopMapping_df" return="StopMapping_table">
+          <generate exp="R2PFORMAT(StopMapping_template, r.getString(0))"/>
+          <generate exp="r.getString(0)"/>
+          <generate exp="r.getString(1)"/>
+        </statements>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="subject">
+        <generate exp="r._1"/>
+        <generate exp="&quot;rdf:type&quot;"/>
+        <generate exp="&quot;ex:Stop&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Assignment" left="result" right="subject"/>
+    </blocks>
+    <blocks/>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="subject">
+        <generate exp="r._1"/>
+        <generate exp="&quot;rdf:type&quot;"/>
+        <generate exp="&quot;ex:City&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="subject"/>
+      </statements>
+    </blocks>
+    <blocks/>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="TransportMapping_table" return="subject">
+        <generate exp="r._1"/>
+        <generate exp="&quot;rdf:type&quot;"/>
+        <generate exp="&quot;ex:Transport&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="subject"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="StopMapping_table" return="subject">
+        <generate exp="r._1"/>
+        <generate exp="&quot;rdf:type&quot;"/>
+        <generate exp="&quot;ex:Stop&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="subject"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:latlong'"/>
+        <generate exp="R2PFORMAT('&lt;http://loc.example.com/latlong/%s,%s>',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="child">
+        <generate exp="r._1"/>
+        <generate exp="r._4"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="TransportMapping_table" return="parent">
+        <generate exp="r._1"/>
+        <generate exp="r._2"/>
+      </statements>
+      <statements xsi:type="scala:Join" return="joinTemp">
+        <relation1 value="child"/>
+        <by1 value="(r._2)"/>
+        <relation2 value="parent"/>
+        <by2 value="r._2"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="joinTemp" return="objects">
+        <generate exp="r.getString(1)"/>
+        <generate exp="'ex:route'"/>
+        <generate exp="r.getString(2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="child">
+        <generate exp="r._1"/>
+        <generate exp="r._5"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="parent">
+        <generate exp="r._1"/>
+        <generate exp="r._2"/>
+      </statements>
+      <statements xsi:type="scala:Join" return="joinTemp">
+        <relation1 value="child"/>
+        <by1 value="(r._2)"/>
+        <relation2 value="parent"/>
+        <by2 value="r._2"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="joinTemp" return="objects">
+        <generate exp="r.getString(1)"/>
+        <generate exp="'ex:location'"/>
+        <generate exp="r.getString(2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="LocationMapping_CSV_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:lat'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="LocationMapping_CSV_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:long'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:latlong'"/>
+        <generate exp="R2PFORMAT('&lt;http://loc.example.com/latlong/%s,%s>',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:countryCode'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:onContinent'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$4)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="LocationMapping_JSON_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:lat'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="LocationMapping_JSON_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:long'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$3)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="TransportMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:type'"/>
+        <generate exp="R2PFORMAT('&lt;http://trans.example.com/vehicle/%s>',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="TransportMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:stop'"/>
+        <generate exp="R2PFORMAT('&lt;http://trans.example.com/stop/%s>',$3)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Foreach" relation="StopMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:stop'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;^^xsd:int',$1)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+      <statements xsi:type="scala:Foreach" relation="StopMapping_table" return="objects">
+        <generate exp="r._1"/>
+        <generate exp="'ex:stopLabel'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="objects"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="scala:Seq" isDefine="true" return="prefixes">
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rdf:&quot;" f3="&quot;&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;xsd:&quot;" f3="&quot;&lt;http://www.w3.org/2001/XMLSchema#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;ex:&quot;" f3="&quot;&lt;http://example.com/ns#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;xsd:&quot;" f3="&quot;&lt;http://www.w3.org/2001/XMLSchema#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rdfs:&quot;" f3="&quot;&lt;http://www.w3.org/2000/01/rdf-schema#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rr:&quot;" f3="&quot;&lt;http://www.w3.org/ns/r2rml#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;rml:&quot;" f3="&quot;&lt;http://semweb.mmlab.be/ns/rml#>.&quot;"/>
+        <tuples f1="&quot;@prefix&quot;" f2="&quot;ql:&quot;" f3="&quot;&lt;http://semweb.mmlab.be/ns/ql#>.&quot;"/>
+        <tuples f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;http://example.com/base/>.&quot;"/>
+      </statements>
+      <statements xsi:type="scala:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="prefixes.toDS()"/>
+      </statements>
+    </blocks>
+  </scala:Program>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@base&quot;" f2="&quot;&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Tuple3 f1="&quot;@prefix&quot;" f2="&quot;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b&quot;" f3="&quot;&lt;org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@14e4317b>.&quot;"/>
+  <scala:Union return="result">
+    <relation1 value="result"/>
+    <relation2 value="subject"/>
+  </scala:Union>
+  <scala:Block/>
+  <scala:Assignment left="result" right="subject"/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="subject"/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="subject"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block>
+    <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="objects">
+      <generate exp="r._1"/>
+      <generate exp="'ex:latlong'"/>
+      <generate exp=""/>
+    </statements>
+    <statements xsi:type="scala:Union" return="result">
+      <relation1 value="result"/>
+      <relation2 value="objects"/>
+    </statements>
+  </scala:Block>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block>
+    <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="objects">
+      <generate exp="r._1"/>
+      <generate exp="'ex:route'"/>
+      <generate exp=""/>
+    </statements>
+    <statements xsi:type="scala:Union" return="result">
+      <relation1 value="result"/>
+      <relation2 value="objects"/>
+    </statements>
+  </scala:Block>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block>
+    <statements xsi:type="scala:Foreach" relation="AirportMapping_table" return="objects">
+      <generate exp="r._1"/>
+      <generate exp="'ex:location'"/>
+      <generate exp=""/>
+    </statements>
+    <statements xsi:type="scala:Union" return="result">
+      <relation1 value="result"/>
+      <relation2 value="objects"/>
+    </statements>
+  </scala:Block>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block>
+    <statements xsi:type="scala:Foreach" relation="VenueMapping_table" return="objects">
+      <generate exp="r._1"/>
+      <generate exp="'ex:latlong'"/>
+      <generate exp=""/>
+    </statements>
+    <statements xsi:type="scala:Union" return="result">
+      <relation1 value="result"/>
+      <relation2 value="objects"/>
+    </statements>
+  </scala:Block>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block>
+    <statements xsi:type="scala:Foreach" relation="TransportMapping_table" return="objects">
+      <generate exp="r._1"/>
+      <generate exp="'ex:stop'"/>
+      <generate exp=""/>
+    </statements>
+    <statements xsi:type="scala:Union" return="result">
+      <relation1 value="result"/>
+      <relation2 value="objects"/>
+    </statements>
+  </scala:Block>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Assignment left="result" right="objects"/>
+  <scala:Block/>
+  <scala:Block/>
+  <scala:Block/>
+</xmi:XMI>

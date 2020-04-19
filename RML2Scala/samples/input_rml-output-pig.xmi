@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pig="https://pig.apache.org/">
+  <pig:Program>
+    <blocks>
+      <statements xsi:type="pig:Default" name="TriplesMap1_source" value="{&quot;iterator&quot;:&quot;/Persons/Person&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;persons.xml&quot;}"/>
+      <statements xsi:type="pig:Default" name="TriplesMap1_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="pig:Default" name="TriplesMap1_iterator" value="/Persons/Person"/>
+      <statements xsi:type="pig:Default" name="TriplesMap1_template" value="{fname}{lname}"/>
+      <statements xsi:type="pig:Load" return="TriplesMap1_data">
+        <path value="persons.xml"/>
+        <using exp="my.udf.R2PLOADSOURCE('${TriplesMap1_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Default" name="TriplesMap2_source" value="{&quot;iterator&quot;:&quot;/Lives/Live&quot;,&quot;referenceFormulation&quot;:&quot;ql:XPath&quot;,&quot;query&quot;:&quot;&quot;,&quot;sqlVersion&quot;:&quot;&quot;,&quot;tableName&quot;:&quot;&quot;,&quot;name&quot;:&quot;lives.xml&quot;}"/>
+      <statements xsi:type="pig:Default" name="TriplesMap2_referenceFormulation" value="ql:XPath"/>
+      <statements xsi:type="pig:Default" name="TriplesMap2_iterator" value="/Lives/Live"/>
+      <statements xsi:type="pig:Default" name="TriplesMap2_template" value="{fname}{lname}"/>
+      <statements xsi:type="pig:Load" return="TriplesMap2_data">
+        <path value="lives.xml"/>
+        <using exp="my.udf.R2PLOADSOURCE('${TriplesMap2_source}')" alias="(data:chararray)"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="TriplesMap2_data" return="TriplesMap2_table">
+          <generate exp="FLATTEN(R2PEXTRACT(data,&#xD;&#xA;&#x9;'${TriplesMap2_referenceFormulation}',&#xD;&#xA;&#x9;'${TriplesMap2_iterator}',&#xD;&#xA;&#x9;R2PTOTUPLE('/Lives/Live/fname,/Lives/Live/lname'),&#xD;&#xA;&#x9;R2PTOTUPLE('/Lives/Live/city')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="TriplesMap2_table" return="TriplesMap2_table">
+          <generate exp="R2PFORMAT('${TriplesMap2_template}', $0)"/>
+          <generate exp="$0"/>
+          <generate exp="$1"/>
+        </statements>
+      </statements>
+      <statements xsi:type="pig:Block">
+        <statements xsi:type="pig:Foreach" relation="TriplesMap1_data" return="TriplesMap1_table">
+          <generate exp="FLATTEN(R2PEXTRACT(data,&#xD;&#xA;&#x9;'${TriplesMap1_referenceFormulation}',&#xD;&#xA;&#x9;'${TriplesMap1_iterator}',&#xD;&#xA;&#x9;R2PTOTUPLE('/Persons/Person/fname,/Persons/Person/lname')))"/>
+        </statements>
+        <statements xsi:type="pig:Foreach" relation="TriplesMap1_table" return="TriplesMap1_table">
+          <generate exp="R2PFORMAT('${TriplesMap1_template}', $0)"/>
+          <generate exp="$0"/>
+        </statements>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TriplesMap1_subjectMap">
+        <right value="TriplesMap1_table"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TriplesMap2_subjectMap">
+        <right value="TriplesMap2_table"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TriplesMap1_objectMap">
+        <right value="TriplesMap1_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TriplesMap1_objectMap" return="TriplesMap1_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'foaf:name'"/>
+        <generate exp="R2PFORMAT('&quot;%s %s&quot;',$1)"/>
+      </statements>
+      <statements xsi:type="pig:Assignment" left="result">
+        <right value="TriplesMap1_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Assignment" left="TriplesMap2_objectMap">
+        <right value="TriplesMap2_table"/>
+      </statements>
+      <statements xsi:type="pig:Foreach" relation="TriplesMap2_objectMap" return="TriplesMap2_objectMap">
+        <generate exp="$0"/>
+        <generate exp="'ex:city'"/>
+        <generate exp="R2PFORMAT('&quot;%s&quot;',$2)"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="TriplesMap2_objectMap"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'rr:'"/>
+        <generate exp="'http://www.w3.org/ns/r2rml#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'foaf:'"/>
+        <generate exp="'http://xmlns.com/foaf/0.1/.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'ex:'"/>
+        <generate exp="'http://example.com/.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'xsd:'"/>
+        <generate exp="'http://www.w3.org/2001/XMLSchema#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'rml:'"/>
+        <generate exp="'http://semweb.mmlab.be/ns/rml#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@prefix'"/>
+        <generate exp="'ql:'"/>
+        <generate exp="'http://semweb.mmlab.be/ns/ql#.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+    <blocks>
+      <statements xsi:type="pig:Foreach" relation="result" return="ns">
+        <generate exp="'@base'"/>
+        <generate exp="''"/>
+        <generate exp="'http://example.com/base/.'"/>
+      </statements>
+      <statements xsi:type="pig:Union" return="result">
+        <relation1 value="result"/>
+        <relation2 value="ns"/>
+      </statements>
+    </blocks>
+  </pig:Program>
+  <pig:Block/>
+  <pig:Union return="result">
+    <relation1 value="result"/>
+    <relation2 value="TriplesMap1_objectMap"/>
+  </pig:Union>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Assignment left="result">
+    <right value="TriplesMap2_objectMap"/>
+  </pig:Assignment>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Block/>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@base'"/>
+    <generate exp="''"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+  <pig:Foreach relation="result" return="ns">
+    <generate exp="'@prefix'"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523'"/>
+    <generate exp="'org.eclipse.m2m.atl.engine.emfvm.lib.OclUndefined@3e98e523.'"/>
+  </pig:Foreach>
+</xmi:XMI>

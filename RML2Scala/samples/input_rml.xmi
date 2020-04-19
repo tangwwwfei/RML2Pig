@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="ASCII"?>
+<rml:Mapping xmi:version="2.0" 
+	xmlns:xmi="http://www.omg.org/XMI" 
+	xmlns:rml="http://www.xtext.org/example/rml/RML">
+	<directives prefix="rdf:" iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="ex:" iri="http://example.com/ns#"/>
+	<directives prefix="xsd:" iri="http://www.w3.org/2001/XMLSchema#"/>
+	<directives prefix="rdfs:" iri="http://www.w3.org/2000/01/rdf-schema#"/>
+	<directives prefix="rr:" iri="http://www.w3.org/ns/r2rml#"/>
+	<directives prefix="rml:" iri="http://semweb.mmlab.be/ns/rml#"/>
+	<directives prefix="ql:" iri="http://semweb.mmlab.be/ns/ql#"/>
+	<directives base="http://example.com/base/"/>
+	<triplesMaps name="AirportMapping">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="Airport.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://airport.example.com/{id}"/>
+			<class>ex:Stop</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="AirportMapping">
+			<predicateMaps>
+				<constant value="ex:latlong"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AirportMapping" parentTriplesMap="LocationMapping_CSV">
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AirportMapping">
+			<predicateMaps>
+				<constant value="ex:route"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AirportMapping" parentTriplesMap="TransportMapping">
+				<joinConditions ownTriplesMap="AirportMapping" parent="/transport/bus/@id" child="bus">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="AirportMapping">
+			<predicateMaps>
+				<constant value="ex:location"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="AirportMapping" parentTriplesMap="VenueMapping">
+				<joinConditions ownTriplesMap="AirportMapping" parent="$.venue[*].location.city" child="city">
+				</joinConditions>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="LocationMapping_CSV">
+		<logicalSource  referenceFormulation="ql:CSV">
+			<source path="Airport.csv"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://loc.example.com/latlong/{latitude},{longitude}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="LocationMapping_CSV">
+			<predicateMaps>
+				<constant value="ex:lat"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="LocationMapping_CSV">
+				<reference value="latitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="LocationMapping_CSV">
+			<predicateMaps>
+				<constant value="ex:long"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="LocationMapping_CSV">
+				<reference value="longitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="VenueMapping">
+		<logicalSource  iterator="$" referenceFormulation="ql:JSONPath">
+			<source path="Venue.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://loc.example.com/city/{$.venue[*].location.city}"/>
+			<class>ex:City</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="ex:latlong"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping" parentTriplesMap="LocationMapping_JSON">
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="ex:countryCode"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="$.venue[*].location.country"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="VenueMapping">
+			<predicateMaps>
+				<constant value="ex:onContinent"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="VenueMapping">
+				<reference value="$.venue[*].location.continent"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="LocationMapping_JSON">
+		<logicalSource  iterator="$" referenceFormulation="ql:JSONPath">
+			<source path="Venue.json"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://loc.example.com/latlong/{$.venue[*].latitude},{$.venue[*].longitude}"/>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="LocationMapping_JSON">
+			<predicateMaps>
+				<constant value="ex:lat"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="LocationMapping_JSON">
+				<reference value="$.venue[*].latitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="LocationMapping_JSON">
+			<predicateMaps>
+				<constant value="ex:long"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="LocationMapping_JSON">
+				<reference value="$.venue[*].longitude"/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="TransportMapping">
+		<logicalSource  iterator="/transport/bus" referenceFormulation="ql:XPath">
+			<source path="Transport.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://trans.example.com/bus/{@id}"/>
+			<class>ex:Transport</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="TransportMapping">
+			<predicateMaps>
+				<constant value="ex:type"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TransportMapping">
+				<template value="http://trans.example.com/vehicle/{@type}"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="TransportMapping">
+			<predicateMaps>
+				<constant value="ex:stop"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="TransportMapping" parentTriplesMap="StopMapping">
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+	<triplesMaps name="StopMapping">
+		<logicalSource  iterator="/transport/bus/route/stop" referenceFormulation="ql:XPath">
+			<source path="Transport.xml"/>
+		</logicalSource>
+		<subjectMap>
+			<template value="http://trans.example.com/stop/{@id}"/>
+			<class>ex:Stop</class>
+		</subjectMap>
+		<predicateObjectMaps ownTriplesMap="StopMapping">
+			<predicateMaps>
+				<constant value="ex:stop"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="StopMapping">
+				<reference value="@id"/>
+				<datatype value="xsd:int"/>
+			</objectMaps>
+		</predicateObjectMaps>
+		<predicateObjectMaps ownTriplesMap="StopMapping">
+			<predicateMaps>
+				<constant value="ex:stopLabel"/>
+			</predicateMaps>
+			<objectMaps ownTriplesMap="StopMapping">
+				<reference value="."/>
+			</objectMaps>
+		</predicateObjectMaps>
+	</triplesMaps>
+</rml:Mapping>

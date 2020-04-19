@@ -1,0 +1,44 @@
+<project name="RML2Scala" default="transformAll" basedir=".">
+	
+	<property name="inputPath" value="E:/RML2PigAndScala/test/resources/passed/bdtest" />
+	
+	<property name="metamodelPath" value="./metamodels/" />
+	<property name="samplePath" value="./samples/" />
+	<property name="transformationPath" value="./transformations/" />	
+	
+	<property name="sourceName" value="input_rml" />
+	<property name="targetName" value="${sourceName}-output-Scala" />
+	<property name="transformationName" value="RML2Scala" />	
+	
+	<target name="transform_rml2scala">
+		<echo message="${dir.name}" />
+		<!-- Loading metamodels -->
+		<atl.loadModel modelHandler="EMF" name="RML" metamodel="MOF" path="${metamodelPath}RML.ecore" />
+		<atl.loadModel modelHandler="EMF" name="Scala" metamodel="MOF" path="${metamodelPath}Scala.ecore" />
+		
+		<atl.loadModel modelHandler="EMF" name="${dir.name}.sourceName" metamodel="RML" path="${dir.name}" />
+		
+		<atl.launch path="${transformationPath}${transformationName}.atl">
+		    <inmodel name="IN" model="${dir.name}.sourceName"/>
+			<outModel name="OUT" model="${dir.name}.targetName" metamodel="Scala" />
+		</atl.launch>
+		
+		<atl.saveModel model="${dir.name}.targetName" path="${samplePath}intermediate.r2s" />
+		  
+		<!-- model to text -->
+		<atl.loadModel name="${dir.name}.targetName" metamodel="Scala" path="${samplePath}intermediate.r2s" />
+		
+		<atl.launch  path="${transformationPath}Scala2Text.atl">
+			<inmodel name="IN" model="${dir.name}.targetName"/>
+		</atl.launch>		
+	</target>
+	
+	<target name="transformAll">
+		<taskdef resource="net/sf/antcontrib/antlib.xml"/>
+        <foreach target="transform_rml2scala" param="dir.name" inheritall="true">
+            <path>
+                <fileset dir="${inputPath}" includes="**/*.xmi" ></fileset>
+            </path>
+        </foreach>
+	</target>
+</project>
