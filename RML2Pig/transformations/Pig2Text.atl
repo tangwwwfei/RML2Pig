@@ -10,18 +10,18 @@ helper def : decode(s : String) : String =
 	s.regexReplaceAll('%3c', '<').regexReplaceAll('%3e', '>');
 
 helper context Pig!Program def: toString(indent: String): String =
-	--'%default current_date `date +%Y-%m-%d-%H-%M-%S`\r\n'+
+	'%default current_date `date +%Y-%m-%d-%H-%M-%S`\r\n'+
 	'REGISTER file:///E:/RML2PigAndScala/LoadTurtle/target/LoadTurtle.jar;\r\n' +
 	'DEFINE R2PFORMAT r2ps.udf.pig.R2PFORMAT;\r\n' +
 	'DEFINE R2PTOBAG r2ps.udf.pig.R2PTOBAG;\r\n' +
 	'DEFINE R2PTOTUPLE r2ps.udf.pig.R2PTOTUPLE;\r\n' +
-	'DEFINE equalCondition r2ps.udf.pig.equalCondition;\r\n' +
-	'DEFINE execFunction r2ps.udf.pig.execFunction;\r\n' +
+	--'DEFINE equalCondition r2ps.udf.pig.equalCondition;\r\n' +
+	--'DEFINE execFunction r2ps.udf.pig.execFunction;\r\n' +
 	self.statements->iterate(s; acc : String = '' | acc + thisModule.decode(s.toString()) + '\r\n') + 
-	'result = distinct result;\r\n' + 
+	--'result = distinct result;\r\n' + 
 	--'\r\nresult = foreach result generate $0,$1,CONCAT($2, \'.\');\r\n' + 
-	'\r\ndump result;'
-	--'store result into \'r2presult/$current_date\';'
+	--'\r\ndump result;'
+	'store result into \'r2presult/$current_date\';'
 ;
 
 helper context Pig!Define def: toString(): String =

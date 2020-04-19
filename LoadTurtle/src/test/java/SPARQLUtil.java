@@ -46,9 +46,7 @@ public class SPARQLUtil extends DBUtil {
     @Override
     public void startDB() throws IOException {
         try {
-            server = builder.build();
-            server.start();
-            assertTrue(server.getDataAccessPointRegistry().isRegistered("/ds1"));
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +69,10 @@ public class SPARQLUtil extends DBUtil {
         Dataset ds = RDFDataMgr.loadDataset(path);
         builder.add("/ds"+(i+1), ds, true);
         ++i;
+
+        //
+        server = builder.build();
+        server.start();
     }
 
     @Override

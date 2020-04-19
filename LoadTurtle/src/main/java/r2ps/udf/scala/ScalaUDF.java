@@ -10,8 +10,11 @@ import r2ps.loadfunc.DataRetrieval;
 import r2ps.udf.pig.R2PFORMAT;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+
 import static r2ps.parser.ParseData.Nested2Flatten;
 
 public class ScalaUDF {
@@ -28,7 +31,15 @@ public class ScalaUDF {
     static public String R2PFORMAT(Object fmt, Object arg) throws IOException {
         Tuple t = TupleFactory.getInstance().newTuple();
         t.append(fmt);
-        t.append(arg);
+        String str = (String) arg;
+        List<Object> objectList = new ArrayList<>();
+        if (str.contains(",")) {
+            objectList = Arrays.asList(str.split(","));
+        }
+        else{
+            objectList.add(arg);
+        }
+        t.append(TupleFactory.getInstance().newTupleNoCopy(objectList));
         return new R2PFORMAT().exec(t);
     }
 

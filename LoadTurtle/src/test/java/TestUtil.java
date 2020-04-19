@@ -319,7 +319,11 @@ public class TestUtil {
 
         spo.predicate = longForm2ShortForm(spo.predicate, spo.p.getNameSpace(),  spo.p.getLocalName(), namespaces);
         if (spo.o.isURI()) {
-            if (except.contains("RMLTC0008b") && spo.object.contains("Tennis")) {
+            if ((except.contains("RMLTC0008b") && spo.object.contains("Tennis"))
+                    || except.contains("RMLTC1005")
+                    || except.contains("RMLTC1007")
+                    || except.contains("RMLTC1008")
+            ) {
                 //Do nothing
             }
             else {

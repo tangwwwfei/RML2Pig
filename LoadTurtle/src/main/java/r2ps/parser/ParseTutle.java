@@ -1,19 +1,24 @@
 package r2ps.parser;
 
+import com.sun.jersey.api.uri.UriTemplate;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.jena.ext.com.google.common.escape.Escaper;
 import org.apache.jena.ext.com.google.common.net.UrlEscapers;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.iri.IRI;
+import org.apache.jena.iri.IRIComponents;
 import org.apache.jena.iri.IRIFactory;
 import org.apache.jena.iri.impl.IRIFactoryImpl;
 import org.apache.jena.util.URIref;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.Tuple;
 import org.eclipse.rdf4j.common.net.ParsedIRI;
-import org.eclipse.rdf4j.query.algebra.IRIFunction;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -102,36 +107,17 @@ public class ParseTutle {
     }
 
     public static String R2PEncode(String str){
-        return str.replaceAll(",", "%2C");  //For Pig, ',' is the separator
+        return StringUtils.replace(str, ",", "%2C");//For Pig, ',' is the separator
     }
 
     public static String R2PDecode(String str) {
-        return str.replaceAll("%2C", ",");
+        return StringUtils.replace(str, "%2C", ",");//For Pig, ',' is the separator
     }
 
-    public static String IRIEncode(String str) throws URISyntaxException {
-        //assert (str.startsWith("<") && str.endsWith(">"));
-        String result = IRIFactory.iriImplementation().create(str).toURI().toASCIIString();
-        //String result = URIref.encode(str.substring(1, str.length()-1));
-        result = result.replaceAll("!", "%21");
-        result = result.replaceAll("#", "%23");
-        result = result.replaceAll("\\$", "%24");
-        result = result.replaceAll("&", "%26");
-        result = result.replaceAll("'", "%27");
-        result = result.replaceAll("\\(", "%28");
-        result = result.replaceAll("\\)", "%29");
-        result = result.replaceAll("\\*", "%2A");
-        result = result.replaceAll("\\+", "%2B");
-        result = result.replaceAll(",", "%2C");
-        result = result.replaceAll("/", "%2F");
-        result = result.replaceAll(":", "%3A");
-        result = result.replaceAll(";", "%3B");
-        result = result.replaceAll("=", "%3D");
-        result = result.replaceAll("\\?", "%3F");
-        result = result.replaceAll("@", "%40");
-        result = result.replaceAll("\\[", "%5B");
-        result = result.replaceAll("]", "%5D");
-
+    public static String IRIEncode(String str) {
+        String[] searchString = {" ", "!", "#", "$", "&", "'", "(", ")", "*","+",",","/",":",";","=","?","@","[","]"};
+        String[] replacString = {"%20","%21","%23","%24","%26","%27","%28","%29","%2A","%2B","%2C","%2F","%3A","%3B","%3D","%3F","%40","%5B","%5D"};
+        String result = StringUtils.replaceEach(str, searchString, replacString);
         return result;
     }
 

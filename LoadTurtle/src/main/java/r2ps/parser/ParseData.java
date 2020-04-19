@@ -3,10 +3,12 @@ package r2ps.parser;
 import com.alibaba.fastjson.JSONArray;
 import com.csvreader.CsvReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.jsonldjava.utils.Obj;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,16 +20,21 @@ import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.ext.xerces.impl.dv.XSSimpleType;
 import org.apache.jena.ext.xerces.impl.dv.xs.XSSimpleTypeDecl;
 import org.apache.pig.data.BagFactory;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.ElementHandler;
-import org.dom4j.ElementPath;
+import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultAttribute;
 import org.eclipse.rdf4j.query.algebra.Load;
 import org.jsfr.json.*;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 import r2ps.loadfunc.DataRetrieval;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,6 +50,17 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import static java.util.Collections.nCopies;
 import static r2ps.parser.ParseTutle.*;
@@ -253,7 +271,7 @@ public class ParseData {
         return matcher.matches();
     }
 
-    public void GenerateData(DataRetrieval dr, SourceType type, List<String> paths, String strResultFomat) throws IOException, DocumentException {
+    public void GenerateData(DataRetrieval dr, SourceType type, List<String> paths, String strResultFomat) throws IOException, DocumentException, ParserConfigurationException, SAXException {
         Param para = new Param();
         para.outPath = dr.getOutPath();
         para.sourceType = type;

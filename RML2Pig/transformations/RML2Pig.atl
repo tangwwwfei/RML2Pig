@@ -36,6 +36,9 @@ rule generateMapping(mapping : RML!Mapping){
 			statements <- mapping.triplesMaps->collect(t | thisModule.GenerateAllTermMaps(t)),
 			statements <- thisModule.GenerateDirectives(mapping.directives)
 		)
+	do{
+		thisModule.debug('Tranformations completed!');
+	}
 }
 
 --To find all template value and reference value
@@ -86,10 +89,16 @@ rule VisitTriplesMap(triplesMap : RML!TriplesMap) {
 rule VisitLogicalSource(triplesName : String, ls : RML!LogicalSource) {
 	using {
 		positions : OrderedSet(String) = OrderedSet{};
+		formula : String = '';
 	}
 	do{
-		thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
-		thisModule.mapOfFormul <- thisModule.mapOfFormul->including(triplesName, ls.referenceFormulation);
+		if (not ls.oclIsUndefined()) {
+			thisModule.mapOfTable <- thisModule.mapOfTable->including(triplesName, positions);
+			if (not ls.referenceFormulation.oclIsUndefined()) {
+				formula <- ls.referenceFormulation;
+			}
+			thisModule.mapOfFormul <- thisModule.mapOfFormul->including(triplesName, formula);
+		}
 	}
 }
 

@@ -52,9 +52,9 @@ public class R2PLOADSOURCE extends LoadFunc {
     public String relativeToAbsolutePath(String location, Path curDir) throws IOException {
 
         String outpath = Long.toString(Calendar.getInstance().getTimeInMillis());
-        //LOG.info("relativeToAbsolutePath outpath:" + outpath);
+        LOG.info("relativeToAbsolutePath outpath:" + outpath);
         String absPath = getAbsolutePath(outpath, curDir);
-        //LOG.info("relativeToAbsolutePath absPath:" + absPath);
+        LOG.info("relativeToAbsolutePath absPath:" + absPath);
         dataRetrieval.setOutPath(absPath);
         Nested2Flatten(dataRetrieval);
         return absPath;
@@ -105,10 +105,15 @@ public class R2PLOADSOURCE extends LoadFunc {
                 String[] inCols = field.split(",");
                 List<Object> ll = new ArrayList<>();
                 for(int j =0; j < inCols.length; ++j) {
-                    Tuple pair = TupleFactory.getInstance().newTuple(2);
-                    pair.set(0, inCols[j]);
-                    pair.set(1, header[j]);
-                    ll.add(pair);
+                    if (header[j].equals(DataRetrieval.RMLType.LITERAL.getType())) {
+                        ll.add(inCols[j]);
+                    }
+                    else {
+                        Tuple pair = TupleFactory.getInstance().newTuple(2);
+                        pair.set(0, inCols[j]); //value
+                        pair.set(1, header[j]); //datatype
+                        ll.add(pair);
+                    }
                 }
                 lstObj.add(TupleFactory.getInstance().newTupleNoCopy(ll));
             }

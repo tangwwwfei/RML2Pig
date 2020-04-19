@@ -5,10 +5,6 @@ import lombok.Data;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.query.*;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.apache.jena.rdfconnection.RDFConnectionFuseki;
-import org.apache.jena.sparql.resultset.ResultsFormat;
 import r2ps.parser.ParseData;
 
 import java.io.ByteArrayOutputStream;
@@ -160,7 +156,6 @@ public @Data class DataRetrieval {
 
     public String getSPARQL(ParseData.Param param) {
         ParseData.SourceType type = param.sourceType;
-        RDFConnection rdfConnection = RDFConnectionFactory.connect(sparql.endpoint);
         QueryExecution q = QueryExecutionFactory.sparqlService(sparql.endpoint, query);
         org.apache.jena.query.ResultSet results = q.execSelect();
         ByteArrayOutputStream os = new ByteArrayOutputStream();

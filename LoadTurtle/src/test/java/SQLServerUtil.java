@@ -1,7 +1,12 @@
+import ch.vorburger.exec.ManagedProcessException;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
+import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.jdbc.ScriptRunner;
+import org.junit.AfterClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +14,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
