@@ -110,8 +110,8 @@ public class R2PLOADSOURCE extends LoadFunc {
                     }
                     else {
                         Tuple pair = TupleFactory.getInstance().newTuple(2);
-                        pair.set(0, inCols[j]); //value
-                        pair.set(1, header[j]); //datatype
+                        pair.set(0, inCols[j]);
+                        pair.set(1, header[j]);
                         ll.add(pair);
                     }
                 }

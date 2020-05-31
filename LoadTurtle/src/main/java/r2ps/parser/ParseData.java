@@ -3,47 +3,35 @@ package r2ps.parser;
 import com.alibaba.fastjson.JSONArray;
 import com.csvreader.CsvReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.jsonldjava.utils.Obj;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import lombok.Getter;
-import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.ext.xerces.impl.dv.XSSimpleType;
-import org.apache.jena.ext.xerces.impl.dv.xs.XSSimpleTypeDecl;
-import org.apache.pig.data.BagFactory;
-import org.dom4j.*;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultAttribute;
-import org.eclipse.rdf4j.query.algebra.Load;
-import org.jsfr.json.*;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
+import org.jsfr.json.JsonSurfer;
+import org.jsfr.json.JsonSurferJackson;
+import org.jsfr.json.SurfingConfiguration;
+import org.xml.sax.XMLFilter;
 import r2ps.loadfunc.DataRetrieval;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.File;
+import javax.xml.stream.*;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -51,18 +39,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import static java.util.Collections.nCopies;
 import static r2ps.parser.ParseTutle.*;
 
 public class ParseData {
@@ -248,7 +224,7 @@ public class ParseData {
                 Path fspath = new Path(dataRetrieval.getName());
                 Configuration conf = new Configuration();
                 FileSystem fs = FileSystem.get(fspath.toUri(), conf);
-                LOG.info("Localfile:" + fspath.getName());
+                LOG.info("Localfile:" + fspath.toString());
                 param.input = fs.open(fspath);
             }
 
@@ -271,7 +247,7 @@ public class ParseData {
         return matcher.matches();
     }
 
-    public void GenerateData(DataRetrieval dr, SourceType type, List<String> paths, String strResultFomat) throws IOException, DocumentException, ParserConfigurationException, SAXException {
+    public void GenerateData(DataRetrieval dr, SourceType type, List<String> paths, String strResultFomat) throws IOException, DocumentException {
         Param para = new Param();
         para.outPath = dr.getOutPath();
         para.sourceType = type;
@@ -347,14 +323,14 @@ public class ParseData {
         }
     }
 
-    protected void ParseXML(Param para, String resultFormat) throws DocumentException,ClassCastException {
+    protected void ParseXML(Param para, String resultFormat) throws DocumentException, ClassCastException, IOException {
         LOG.info("----------------------ParseXML:Begin----------------------");
         List<Object> line = Arrays.asList(new Object[para.paths.length]);
         String[] result = new String[line.size()];
         for (int i = 0; i < line.size(); ++i) {
             line.set(i, new ArrayList<>());
         }
-        SAXReader reader = new SAXReader();
+        SAXReader reader = SAXReader.createDefault();
         reader.addHandler(para.prefix, new ElementHandler() {
             @Override
             public void onStart(ElementPath elementPath) {
@@ -390,10 +366,16 @@ public class ParseData {
                     ArrayList<Object> los = cast(o);
                     los.clear();
                 }
+                //n.getParent().content().clear();
                 n.detach();
             }
         });
-        reader.read(para.input);
+
+        R2PInputStreamFilter filter = new R2PInputStreamFilter(para.input);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(filter);
+
+        reader.read(bufferedInputStream);
+
         LOG.info("----------------------ParseXML:End----------------------");
     }
 
